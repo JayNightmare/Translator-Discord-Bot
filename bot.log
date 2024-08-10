@@ -1,0 +1,53 @@
+[2024-08-10T13:57:02.938Z] Received message from jaynightmare: loco
+[2024-08-10T13:57:02.939Z] Cleaned message content: loco
+[2024-08-10T13:57:02.941Z] Detected language: es
+[2024-08-10T13:57:02.942Z] Attempting to translate text: loco
+[2024-08-10T13:57:03.184Z] API Response: {"detectedLanguage":{"confidence":90,"language":"es"},"translatedText":"crazy"}
+[2024-08-10T13:57:03.184Z] Translation result: crazy, Language: Spanish, Flag URL: https://flagcdn.com/w40/es.png
+[2024-08-10T13:57:03.613Z] Received message from Translate Bot: 
+[2024-08-10T13:57:03.669Z] Message translated and sent successfully.
+[2024-08-10T13:57:10.559Z] Received message from jaynightmare: lol
+[2024-08-10T13:57:10.560Z] Cleaned message content: lol
+[2024-08-10T13:57:10.672Z] Detected language: es
+[2024-08-10T13:57:10.672Z] Attempting to translate text: lol
+[2024-08-10T13:57:10.833Z] API Response: {"detectedLanguage":{"confidence":30,"language":"en"},"translatedText":"lol"}
+[2024-08-10T13:57:10.833Z] Translation result: lol, Language: Unknown Language, Flag URL: null
+[2024-08-10T13:57:11.283Z] Received message from Translate Bot: 
+[2024-08-10T13:57:11.350Z] Message translated and sent successfully.
+[2024-08-10T13:58:06.072Z] Received message from jaynightmare: thanks
+[2024-08-10T13:58:06.073Z] Cleaned message content: thanks
+[2024-08-10T13:58:06.073Z] Detected language: en
+[2024-08-10T13:58:06.074Z] Message is in English, skipping translation.
+[2024-08-10T13:58:11.040Z] Received message from jaynightmare: crazy
+[2024-08-10T13:58:11.040Z] Cleaned message content: crazy
+[2024-08-10T13:58:11.041Z] Detected language: it
+[2024-08-10T13:58:11.041Z] Attempting to translate text: crazy
+[2024-08-10T13:58:11.201Z] API Response: {"detectedLanguage":{"confidence":18,"language":"en"},"translatedText":"crazy"}
+[2024-08-10T13:58:11.201Z] Translation result: crazy, Language: Unknown Language, Flag URL: null
+[2024-08-10T13:58:11.673Z] Received message from Translate Bot: 
+[2024-08-10T13:58:11.688Z] Message translated and sent successfully.
+[2024-08-10T14:02:02.522Z] Received message from jaynightmare: crazy
+[2024-08-10T14:02:02.523Z] Cleaned message content: crazy
+[2024-08-10T14:02:02.525Z] Detected language: it
+[2024-08-10T14:02:02.526Z] Attempting to translate text: crazy
+[2024-08-10T14:02:02.701Z] API Response: {"detectedLanguage":{"confidence":18,"language":"en"},"translatedText":"crazy"}
+[2024-08-10T14:02:02.701Z] Translation result: crazy, Language: Unknown Language, Flag URL: null
+[2024-08-10T14:02:03.370Z] Received message from Translate Bot: 
+[2024-08-10T14:02:03.387Z] Message translated and sent successfully.
+[2024-08-10T14:02:06.858Z] Received message from jaynightmare: lol
+[2024-08-10T14:02:10.040Z] Received message from jaynightmare: wtf
+[2024-08-10T14:02:15.953Z] Received message from jaynightmare: tb!view
+[2024-08-10T14:02:16.162Z] Received message from Translate Bot: Ignore list: thanks, thx, ello, hmm, lol, wtf, omg, brb, idk, lmao, rofl, smh, nah, yep, yup, uhh, uhm, nah, yolo, ttyl, sup, yo, hey, hi, hiya, sup, yo, wassup, hahaha, hehe, k, ok, okay, pls, plz, nope, yikes, nah, welp, gonna, gotta, wanna, whatcha, cya, gg, gr8, np, btw, ikr, thx, ez, fyi, jk, tbh, imo, imho
+[2024-08-10T14:02:16.436Z] Received message from Translate Bot: Ignore list: thanks, thx, ello, hmm, lol, wtf, omg, brb, idk, lmao, rofl, smh, nah, yep, yup, uhh, uhm, nah, yolo, ttyl, sup, yo, hey, hi, hiya, sup, yo, wassup, hahaha, hehe, k, ok, okay, pls, plz, nope, yikes, nah, welp, gonna, gotta, wanna, whatcha, cya, gg, gr8, np, btw, ikr, thx, ez, fyi, jk, tbh, imo, imho
+[2024-08-10T14:02:16.721Z] Received message from Translate Bot: Ignore list: thanks, thx, ello, hmm, lol, wtf, omg, brb, idk, lmao, rofl, smh, nah, yep, yup, uhh, uhm, nah, yolo, ttyl, sup, yo, hey, hi, hiya, sup, yo, wassup, hahaha, hehe, k, ok, okay, pls, plz, nope, yikes, nah, welp, gonna, gotta, wanna, whatcha, cya, gg, gr8, np, btw, ikr, thx, ez, fyi, jk, tbh, imo, imho
+[2024-08-10T14:02:16.979Z] Received message from Translate Bot: Ignore list: thanks, thx, ello, hmm, lol, wtf, omg, brb, idk, lmao, rofl, smh, nah, yep, yup, uhh, uhm, nah, yolo, ttyl, sup, yo, hey, hi, hiya, sup, yo, wassup, hahaha, hehe, k, ok, okay, pls, plz, nope, yikes, nah, welp, gonna, gotta, wanna, whatcha, cya, gg, gr8, np, btw, ikr, thx, ez, fyi, jk, tbh, imo, imho
+[2024-08-10T14:04:59.861Z] Received message from jaynightmare: ello
+[2024-08-10T14:04:59.862Z] Cleaned message content: ello
+[2024-08-10T14:04:59.865Z] Detected language: it
+[2024-08-10T14:04:59.865Z] Attempting to translate text: ello
+[2024-08-10T14:05:00.111Z] API Response: {"detectedLanguage":{"confidence":90,"language":"es"},"translatedText":"that"}
+[2024-08-10T14:05:00.111Z] Translation result: that, Language: Spanish, Flag URL: https://flagcdn.com/w40/es.png
+[2024-08-10T14:05:00.588Z] Message translated and sent successfully.
+[2024-08-10T14:08:41.539Z] Message contains ignored words, skipping translation.
+[2024-08-10T14:10:52.660Z] Message contains ignored words, skipping translation.
+[2024-08-10T14:11:18.861Z] Message contains ignored words, skipping translation.

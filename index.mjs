@@ -5,11 +5,28 @@ import fetch from 'node-fetch';
 import langdetect from 'langdetect';
 
 import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Setup log file
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const logFile = fs.createWriteStream(path.join(__dirname, 'bot.log'), { flags: 'a' });
+
 const ignoreWordsPath = './ignoreWords.json';
 let ignoreWords = [];
 
+const commandPrefix = 'tb!';
+
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
 const API_URL = process.env.API_URL;
+
+// Logging function
+function log(message) {
+    const timestamp = new Date().toISOString();
+    logFile.write(`[${timestamp}] ${message}\n`);
+    console.log(`[${timestamp}] ${message}`);
+}
 
 client.once('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
@@ -35,71 +52,92 @@ function cleanMessage(content) {
 }
 
 
-client.on('messageCreate', (message) => {
-    if (!message.member.permissions.has('MANAGE_MESSAGES')) {
-        return message.reply('You do not have permission to use this command.');
-    }
-
-    else if (message.member.permissions.has('MANAGE_MESSAGES')) {
-        client.on('messageCreate', (message) => {
-            if (message.content === 'tb!view') {
-                message.reply(`Ignore list: ${ignoreWords.join(', ')}`);
-            }
-        });
-
-        if (message.content.startsWith('tb!rm')) {
-            const word = message.content.split(' ')[1];
-            ignoreWords = ignoreWords.filter(w => w !== word.toLowerCase());
-            saveIgnoreWords(); // Save updated list to file
-            message.reply(`Removed "${word}" from the ignore list.`);
-        }
-
-        if (message.content.startsWith('tb!addi')) {
-            const word = message.content.split(' ')[1];
-            if (word && !ignoreWords.includes(word.toLowerCase())) {
-                ignoreWords.push(word.toLowerCase());
-                saveIgnoreWords(); // Save updated list to file
-                message.reply(`Added "${word}" to the ignore list.`);
-            } else {
-                message.reply(`${word ? `"${word}" is already in the ignore list.` : "Please specify a word to add."}`);
-            }
-        }
-    }
-});
-
 client.on('messageCreate', async (message) => {
-    if (message.author.bot || !shouldTranslate(message.content)) return;
+    try {
+        // Ignore bot messages and messages without permission
+        if (message.author.bot) return;
 
-    const cleanedContent = cleanMessage(message.content);
+        if (message.content.startsWith(commandPrefix)) {
+            // Command handling logic
+            const [command, ...args] = message.content.slice(commandPrefix.length).trim().split(/\s+/);
 
-    // Skip processing if the message is empty after cleaning
-    if (!cleanedContent) return;
+            if (!message.member.permissions.has('MANAGE_MESSAGES')) {
+                return message.reply('You do not have permission to use this command.');
+            }
 
-    const detectedLang = langdetect.detectOne(cleanedContent);
-    console.log("Detected Language Code:", detectedLang);
+            if (command === 'view') {
+                message.reply(`Ignore list: ${ignoreWords.join(', ')}`);
+                console.log("View called\n" + `Ignore list: ${ignoreWords.join(', ')}`);
+            }
 
-    if (detectedLang === 'en') {
-        console.log('Message is in English, skipping translation.');
-        return;
-    }
+            if (command === 'rm') {
+                const word = args[0];
+                ignoreWords = ignoreWords.filter(w => w !== word.toLowerCase());
+                saveIgnoreWords(); // Save updated list to file
+                message.reply(`Removed "${word}" from the ignore list.`);
+                console.log(`Removed "${word}" from the ignore list.`);
+            }
 
-    const { translatedText, flagUrl, languageName } = await translateText(cleanedContent);
-
-    if (translatedText) {
-        const embed = new EmbedBuilder()
-            .setColor('#0099ff')
-            .setAuthor({ name: message.author.username, iconURL: message.author.displayAvatarURL() })
-            .setDescription(`${translatedText}`)
-            .setFooter({ text: `Original: ${message.content} | Language: ${languageName}` });
-
-        if (flagUrl) {
-            embed.setThumbnail(flagUrl);
+            if (command === 'addi') {
+                const word = args[0];
+                if (word && !ignoreWords.includes(word.toLowerCase())) {
+                    ignoreWords.push(word.toLowerCase());
+                    saveIgnoreWords(); // Save updated list to file
+                    message.reply(`Added "${word}" to the ignore list.`);
+                    console.log(`Added "${word}" to the ignore list.`);
+                } else {
+                    message.reply(`${word ? `"${word}" is already in the ignore list.` : "Please specify a word to add."}`);
+                }
+            }
+            return; // Exit after handling a command
         }
 
-        await message.delete();
-        await message.channel.send({ embeds: [embed] });
+        // Skip messages that contain ignored words
+        if (!shouldTranslate(message.content)) {
+            log('Message contains ignored words, skipping translation.');
+            return;
+        }
+
+        const cleanedContent = cleanMessage(message.content);
+        if (!cleanedContent) {
+            log('Message is empty after cleaning, skipping.');
+            return;
+        }
+
+        log(`Cleaned message content: ${cleanedContent}`);
+        const detectedLang = langdetect.detectOne(cleanedContent);
+        log(`Detected language: ${detectedLang}`);
+
+        if (detectedLang === 'en') {
+            log('Message is in English, skipping translation.');
+            return;
+        }
+
+        const { translatedText, flagUrl, languageName } = await translateText(cleanedContent);
+        log(`Translation result: ${translatedText}, Language: ${languageName}, Flag URL: ${flagUrl}`);
+
+        if (translatedText) {
+            const embed = new EmbedBuilder()
+                .setColor('#0099ff')
+                .setAuthor({ name: message.author.username, iconURL: message.author.displayAvatarURL() })
+                .setDescription(`${translatedText}`)
+                .setFooter({ text: `Original: ${message.content} | Language: ${languageName}` });
+
+            if (flagUrl) {
+                embed.setThumbnail(flagUrl);
+            }
+
+            await message.delete();
+            await message.channel.send({ embeds: [embed] });
+            log('Message translated and sent successfully.');
+        }
+    } catch (error) {
+        log(`Error processing message: ${error.stack || error.message}`);
+        console.error(error);
     }
 });
+
+
 
 function shouldTranslate(messageContent) {
     const words = messageContent.split(/\s+/);
@@ -108,6 +146,7 @@ function shouldTranslate(messageContent) {
 
 async function translateText(text) {
     try {
+        log(`Attempting to translate text: ${text}`);
         const response = await fetch(API_URL, {
             method: "POST",
             body: JSON.stringify({
@@ -119,8 +158,10 @@ async function translateText(text) {
             headers: { "Content-Type": "application/json" }
         });
 
+        if (!response.ok) throw new Error(`Translation API responded with status ${response.status}`);
+
         const data = await response.json();
-        console.log("API Response:", data);
+        log(`API Response: ${JSON.stringify(data)}`);
 
         const languageCode = data.detectedLanguage.language; 
 
@@ -128,11 +169,17 @@ async function translateText(text) {
         const languageName = getLanguageName(languageCode);
 
         return { translatedText: data.translatedText, flagUrl, languageName };
-    } catch (error) {
-        console.error('Translation error:', error);
-        return { translatedText: null, flagUrl: null, languageName: null };
+    }
+    catch (error) {
+        log(`Translation error: ${error.stack || error.message}`);
+        throw error; // Re-throw to be caught by the calling function
     }
 }
+
+process.on('unhandledRejection', (reason, promise) => {
+    log(`Unhandled Rejection: ${reason.message || reason}`);
+    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
 
 function getFlagUrl(languageCode) {
     const flagMap = {
