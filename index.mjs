@@ -4,6 +4,8 @@ import { Client, GatewayIntentBits, EmbedBuilder } from 'discord.js';
 import fetch from 'node-fetch';
 import langdetect from 'langdetect';
 
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder } from 'discord.js';
+
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -51,6 +53,70 @@ function cleanMessage(content) {
         .trim();
 }
 
+function createIgnoreWordsEmbed(page = 1) {
+    const wordsPerPage = 50;
+    const totalPages = Math.ceil(ignoreWords.length / wordsPerPage);
+    const startIndex = (page - 1) * wordsPerPage;
+    const endIndex = startIndex + wordsPerPage;
+    const wordsToShow = ignoreWords.slice(startIndex, endIndex);
+
+    let formattedWords = '';
+    for (let i = 0; i < wordsToShow.length; i += 5) {
+        const word1 = `${startIndex + i + 1}. \`\`\`${wordsToShow[i] || ''}\`\`\``.padEnd(25);
+        const word2 = `${startIndex + i + 2}. \`\`\`${wordsToShow[i + 1] || ''}\`\`\``.padEnd(25);
+        formattedWords += `${word1}${word2}\n`;
+    }
+
+    const embed = new EmbedBuilder()
+        .setTitle('Ignored Words')
+        .setDescription(`${formattedWords}`)
+        .setFooter({ text: `Page ${page} of ${totalPages}` });
+
+    const buttons = new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+            .setCustomId('prev10')
+            .setLabel('Previous 10')
+            .setStyle(ButtonStyle.Secondary)
+            .setDisabled(page <= 10),
+        new ButtonBuilder()
+            .setCustomId('prev')
+            .setLabel('Previous')
+            .setStyle(ButtonStyle.Primary)
+            .setDisabled(page === 1),
+        new ButtonBuilder()
+            .setCustomId('next')
+            .setLabel('Next')
+            .setStyle(ButtonStyle.Primary)
+            .setDisabled(page === totalPages),
+        new ButtonBuilder()
+            .setCustomId('next10')
+            .setLabel('Next 10')
+            .setStyle(ButtonStyle.Secondary)
+            .setDisabled(page + 10 > totalPages)
+    );
+
+    return { embed, buttons };
+}
+
+client.on('interactionCreate', async (interaction) => {
+    if (!interaction.isButton()) return;
+
+    let currentPage = parseInt(interaction.message.embeds[0].footer.text.match(/Page (\d+) of/)[1]);
+
+    if (interaction.customId === 'prev10') { log('Button Pressed - Prev 10'); currentPage -= 10; }
+    if (interaction.customId === 'prev') { log('Button Pressed - Prev'); currentPage--; } 
+    if (interaction.customId === 'next') { log('Button Pressed - Next'); currentPage++; } 
+    if (interaction.customId === 'next10') { log('Button Pressed - Next 10'); currentPage += 10; }
+
+    // Ensure the page is within valid range
+    if (currentPage < 1) currentPage = 1;
+    if (currentPage > Math.ceil(ignoreWords.length / 50)) currentPage = Math.ceil(ignoreWords.length / 50);
+
+    log(`Current Page: ${currentPage}`);
+    
+    const { embed, buttons } = createIgnoreWordsEmbed(currentPage);
+    await interaction.update({ embeds: [embed], components: [buttons] });
+});
 
 client.on('messageCreate', async (message) => {
     try {
@@ -66,7 +132,8 @@ client.on('messageCreate', async (message) => {
             }
 
             if (command === 'view') {
-                message.reply(`Ignore list: ${ignoreWords.join(', ')}`);
+                const { embed, buttons } = createIgnoreWordsEmbed();
+                message.channel.send({ embeds: [embed], components: [buttons] })
                 console.log("View called\n" + `Ignore list: ${ignoreWords.join(', ')}`);
             }
 
@@ -137,8 +204,6 @@ client.on('messageCreate', async (message) => {
     }
 });
 
-
-
 function shouldTranslate(messageContent) {
     const words = messageContent.split(/\s+/);
     return !words.some(word => ignoreWords.includes(word.toLowerCase()));
@@ -162,8 +227,19 @@ async function translateText(text) {
 
         const data = await response.json();
         log(`API Response: ${JSON.stringify(data)}`);
+        console.log(data);
 
-        const languageCode = data.detectedLanguage.language; 
+        // Extract the confidence score
+        const confidence = data.detectedLanguage?.confidence;
+        log(`Detected confidence: ${confidence}`);
+
+        // Skip translation if confidence is below 85%
+        if (confidence !== undefined && confidence < 35) {
+            log(`Translation skipped due to low confidence: ${confidence}`);
+            return { translatedText: null, flagUrl: null, languageName: null };
+        }
+
+        const languageCode = data.detectedLanguage.language;
 
         const flagUrl = getFlagUrl(languageCode);
         const languageName = getLanguageName(languageCode);
@@ -175,6 +251,8 @@ async function translateText(text) {
         throw error; // Re-throw to be caught by the calling function
     }
 }
+
+
 
 process.on('unhandledRejection', (reason, promise) => {
     log(`Unhandled Rejection: ${reason.message || reason}`);
