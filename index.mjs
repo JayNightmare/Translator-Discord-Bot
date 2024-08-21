@@ -3,9 +3,7 @@ dotenv.config();
 import { Client, GatewayIntentBits, EmbedBuilder } from 'discord.js';
 import fetch from 'node-fetch';
 import langdetect from 'langdetect';
-
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder } from 'discord.js';
-
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -16,9 +14,11 @@ const __dirname = path.dirname(__filename);
 const logFile = fs.createWriteStream(path.join(__dirname, 'bot.log'), { flags: 'a' });
 
 const ignoreWordsPath = './ignoreWords.json';
+const blacklistedChannelsPath = './blacklist.json';
 let ignoreWords = [];
+let blacklist = {};
 
-const commandPrefix = 'tb!';
+const commandPrefix = 't.';
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
 const API_URL = process.env.API_URL;
@@ -32,23 +32,53 @@ function log(message) {
 
 client.once('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
+    log(`Connected to servers: ${client.guilds.cache.map(guild => `${guild.name} (ID: ${guild.id})`).join(', ')}`);
+
+    // Log the blacklisted channels for each server
+    client.guilds.cache.forEach(guild => {
+        const blacklisted = blacklist[guild.id] || [];
+        const blacklistedNames = blacklisted.map(channelId => {
+            const channel = guild.channels.cache.get(channelId);
+            return channel ? `${channel.name} (ID: ${channelId})` : `Unknown (ID: ${channelId})`;
+        });
+        log(`Blacklisted channels in ${guild.name} (${guild.id}): ${blacklistedNames.join(', ')}`);
+    });
 });
 
-// Load existing ignore words from file
+// Load existing ignore words and blacklisted channels from file
 if (fs.existsSync(ignoreWordsPath)) {
     const data = fs.readFileSync(ignoreWordsPath);
     ignoreWords = JSON.parse(data);
 }
 
+if (fs.existsSync(ignoreWordsPath)) {
+    try {
+        const data = fs.readFileSync(ignoreWordsPath, 'utf8');
+        if (data.trim()) {
+            ignoreWords = JSON.parse(data);
+        } else {
+            log('Ignore words file is empty.');
+        }
+    } catch (error) {
+        log(`Failed to parse ignoreWords.json: ${error.message}`);
+        console.error('Error parsing ignoreWords.json:', error);
+    }
+}
+
+// Save blacklisted channels to file
+function saveBlacklistedChannels() {
+    fs.writeFileSync(blacklistedChannelsPath, JSON.stringify(blacklist, null, 2));
+}
+
+// Load ignore words
 function saveIgnoreWords() {
     fs.writeFileSync(ignoreWordsPath, JSON.stringify(ignoreWords, null, 2));
 }
 
 function cleanMessage(content) {
-    // Remove custom Discord emotes, text-based emotes, and Unicode emojis
     return content
-        .replace(/<:[a-zA-Z0-9_]+:[0-9]+>/g, '')  // Remove custom emotes like <:emote:123456>
-        .replace(/:[a-zA-Z0-9_]+:/g, '')          // Remove text-based emotes like :DanceLizard:
+        .replace(/<:[a-zA-Z0-9_]+:[0-9]+>/g, '')  // Remove custom emotes
+        .replace(/:[a-zA-Z0-9_]+:/g, '')          // Remove text-based emotes
         .replace(/[\u{1F600}-\u{1F64F}]/gu, '')   // Remove standard Unicode emojis
         .trim();
 }
@@ -60,16 +90,20 @@ function createIgnoreWordsEmbed(page = 1) {
     const endIndex = startIndex + wordsPerPage;
     const wordsToShow = ignoreWords.slice(startIndex, endIndex);
 
+    // * Set the desired column width
+    const columnWidth = 25; // * Adjust this value as needed for spacing
+
+    // * Format words into 2 columns with a specified width
     let formattedWords = '';
-    for (let i = 0; i < wordsToShow.length; i += 5) {
-        const word1 = `${startIndex + i + 1}. \`\`\`${wordsToShow[i] || ''}\`\`\``.padEnd(25);
-        const word2 = `${startIndex + i + 2}. \`\`\`${wordsToShow[i + 1] || ''}\`\`\``.padEnd(25);
+    for (let i = 0; i < wordsToShow.length; i += 2) {
+        const word1 = `${startIndex + i + 1}. ${wordsToShow[i] || ''}`.padEnd(columnWidth);
+        const word2 = wordsToShow[i + 1] ? `${startIndex + i + 2}. ${wordsToShow[i + 1] || ''}` : ''; // Avoids adding undefined
         formattedWords += `${word1}${word2}\n`;
     }
 
     const embed = new EmbedBuilder()
         .setTitle('Ignored Words')
-        .setDescription(`${formattedWords}`)
+        .setDescription(`\`\`\`${formattedWords}\`\`\``)
         .setFooter({ text: `Page ${page} of ${totalPages}` });
 
     const buttons = new ActionRowBuilder().addComponents(
@@ -103,37 +137,64 @@ client.on('interactionCreate', async (interaction) => {
 
     let currentPage = parseInt(interaction.message.embeds[0].footer.text.match(/Page (\d+) of/)[1]);
 
-    if (interaction.customId === 'prev10') { log('Button Pressed - Prev 10'); currentPage -= 10; }
-    if (interaction.customId === 'prev') { log('Button Pressed - Prev'); currentPage--; } 
-    if (interaction.customId === 'next') { log('Button Pressed - Next'); currentPage++; } 
-    if (interaction.customId === 'next10') { log('Button Pressed - Next 10'); currentPage += 10; }
+    if (interaction.customId === 'prev10') { currentPage -= 10; }
+    if (interaction.customId === 'prev') { currentPage--; } 
+    if (interaction.customId === 'next') { currentPage++; } 
+    if (interaction.customId === 'next10') { currentPage += 10; }
 
     // Ensure the page is within valid range
     if (currentPage < 1) currentPage = 1;
     if (currentPage > Math.ceil(ignoreWords.length / 50)) currentPage = Math.ceil(ignoreWords.length / 50);
-
-    log(`Current Page: ${currentPage}`);
     
     const { embed, buttons } = createIgnoreWordsEmbed(currentPage);
     await interaction.update({ embeds: [embed], components: [buttons] });
 });
 
+
 client.on('messageCreate', async (message) => {
     try {
-        // Ignore bot messages and messages without permission
+        // * Check if the message is from a blacklisted channel
+        const isBlacklisted = blacklist[message.guild.id] && blacklist[message.guild.id].includes(message.channel.id);
+
+        // * List of management commands that can bypass the blacklist
+        const managementCommands = ['addbl', 'rmbl', 'viewbl'];
+
+        // * Extract the command from the message content
+        const [command] = message.content.slice(commandPrefix.length).trim().split(/\s+/);
+
+        // * Allow management commands even in blacklisted channels
+        if (isBlacklisted && !managementCommands.includes(command)) {
+            log('Message is in a blacklisted channel, ignoring.');
+            return;
+        }
+
+        // * Initialize blacklist for the server if it doesn't exist
+        if (!blacklist[message.guild.id]) {
+            blacklist[message.guild.id] = message.guild.channels.cache.map(channel => channel.id);
+            saveBlacklistedChannels();
+        }
+
+        // * Ignore messages from blacklisted channels if not a management command
+        if (isBlacklisted && !managementCommands.includes(command)) {
+            log(`Message in blacklisted channel ${message.channel.id} ignored.`);
+            return;
+        }
+
+        // * Ignore bot messages
         if (message.author.bot) return;
 
         if (message.content.startsWith(commandPrefix)) {
-            // Command handling logic
+            // ? Command handling logic
             const [command, ...args] = message.content.slice(commandPrefix.length).trim().split(/\s+/);
 
             if (!message.member.permissions.has('MANAGE_MESSAGES')) {
                 return message.reply('You do not have permission to use this command.');
             }
 
+            // * Normal Commands *
             if (command === 'view') {
                 const { embed, buttons } = createIgnoreWordsEmbed();
-                message.channel.send({ embeds: [embed], components: [buttons] })
+                message.channel.send({ embeds: [embed], components: [buttons] });
                 console.log("View called\n" + `Ignore list: ${ignoreWords.join(', ')}`);
             }
 
@@ -156,6 +217,42 @@ client.on('messageCreate', async (message) => {
                     message.reply(`${word ? `"${word}" is already in the ignore list.` : "Please specify a word to add."}`);
                 }
             }
+            // !!!!
+
+            // * Black List Commands *
+            if (command === 'addbl') {
+                const channelId = args[0];
+                if (!blacklist[message.guild.id].includes(channelId)) {
+                    return message.reply(`Channel ${channelId} is not blacklisted.`);
+                }
+
+                blacklist[message.guild.id] = blacklist[message.guild.id].filter(id => id !== channelId);
+                saveBlacklistedChannels(); // Save updated blacklist to file
+                message.reply(`Channel <#${channelId}> has been removed from the blacklist.`);
+                console.log(`Channel ${channelId} has been removed from the blacklist.`);
+            }
+
+            if (command === 'viewbl') {
+                const blacklisted = blacklist[message.guild.id] || [];
+                if (blacklisted.length === 0) {
+                    return message.reply('No channels are blacklisted in this server.');
+                }
+        
+                let formattedChannels = '';
+                blacklisted.forEach((channelId, index) => {
+                    const channel = message.guild.channels.cache.get(channelId);
+                    formattedChannels += `${index + 1}. ${channel ? channel.name : `Unknown`} (ID: ${channelId})\n`;
+                });
+        
+                const embed = new EmbedBuilder()
+                    .setTitle('Blacklisted Channels')
+                    .setDescription(`\`\`\`${formattedChannels}\`\`\``)
+                    .setFooter({ text: `Total blacklisted channels: ${blacklisted.length}` });
+        
+                message.channel.send({ embeds: [embed] });
+            }
+            // !!!!
+
             return; // Exit after handling a command
         }
 
@@ -364,6 +461,5 @@ function getLanguageName(languageCode) {
 
     return languageMap[languageCode] || "Unknown Language";
 }
-
 
 client.login(process.env.BOT_TOKEN);
