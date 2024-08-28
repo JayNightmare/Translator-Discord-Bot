@@ -1,6 +1,9 @@
-# Discord Bot
-This bot translates messages automatically for users who don't speek english. 
-**------
+<div align=center>  
+   <img src="trans.png"  width=128px>
+</div>
+<h2 align=center>Translator Bot</h2>
+<p align=center>This bot translates messages automatically for users who don't speek english.</p> 
+
 ## How does it work?
 It uses LibreTranslate API self-hosting API to detect the language of the message. It bases it off of a confidence variable to determine the language. This is can be run on a server (which is what I'm using). 
 
@@ -11,14 +14,15 @@ It uses LibreTranslate API self-hosting API to detect the language of the messag
 #### 2. **Clone the GitHub Repository**
    - Clone the repository to machine:
      ```bash
-     git clone https://github.com/JayNightmare/LibreTranslate-Translator-Bot---Discord.js-Bot.git
-     cd LibreTranslate-Translator-Bot---Discord.js-Bot
+     git clone https://github.com/JayNightmare/Translator-Discord-Bot.git
+     cd Translator-Discord-Bot
      ```
 
 #### 3. **Install Dependencies**
    - Navigate to the project directory and install the required npm packages:
      ```bash
-     npm install
+     npm init -y
+     npm install discord.js axios dotenv
      ```
 
 #### 4. **Create a Discord Bot**
