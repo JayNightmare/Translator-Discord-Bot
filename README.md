@@ -1,6 +1,9 @@
-# Discord Bot
-This bot translates messages automatically for users who don't speek english. 
-**------
+<div align=center>  
+   <img src="trans.png"  width=128px>
+</div>
+<h2 align=center>Translator Bot</h2>
+<p align=center>This bot translates messages automatically for users who don't speek english.</p> 
+
 ## How does it work?
 It uses LibreTranslate API self-hosting API to detect the language of the message. It bases it off of a confidence variable to determine the language. This is can be run on a server (which is what I'm using). 
 
@@ -11,14 +14,15 @@ It uses LibreTranslate API self-hosting API to detect the language of the messag
 #### 2. **Clone the GitHub Repository**
    - Clone the repository to machine:
      ```bash
-     git clone https://github.com/JayNightmare/LibreTranslate-Translator-Bot---Discord.js-Bot.git
-     cd LibreTranslate-Translator-Bot---Discord.js-Bot
+     git clone https://github.com/JayNightmare/Translator-Discord-Bot.git
+     cd Translator-Discord-Bot
      ```
 
 #### 3. **Install Dependencies**
    - Navigate to the project directory and install the required npm packages:
      ```bash
-     npm install
+     npm init -y
+     npm install discord.js axios dotenv
      ```
 
 #### 4. **Create a Discord Bot**
@@ -45,35 +49,7 @@ It uses LibreTranslate API self-hosting API to detect the language of the messag
 #### 6. **Set Up and Run the LibreTranslate API**
    - If you haven't already, set up LibreTranslate on a server (e.g., Linode) and ensure it's running.
    - If self-hosting, ensure your server is properly configured to handle requests.
------
-Here’s a guide to install it on your server:
-
-1. **Create a Linode Server**:
-   - Deploy a new Linode instance with a Linux distribution like Debian 12 or Ubuntu 24.04 LTS. I'm using the $5 shared CPU server which is more than enough to run this bot.
-
-2. **Install Dependencies**:
-   - SSH into your Linode server and install the necessary dependencies, including Docker.
-
-   ```bash
-   sudo apt-get update
-   sudo apt-get install docker.io
-   ```
-
-3. **Run LibreTranslate**:
-   - Pull the LibreTranslate Docker image and run it.
-
-   ```bash
-   sudo docker run -d -p 5000:5000 libretranslate/libretranslate
-   ```
-
-4. **Access the API**:
-   - The API will be accessible at `http://your-linode-ip:5000/translate`.
-
-To test to see if the API is working, you can run a CURL line:
-```bash
-curl -X POST http://your-linode-ip:5000/translate -H "Content-Type: application/json" -d '{"q": "Hola", "source": "es", "target": "en"}'
-```
------
+   - 
 #### 7. **Run the Bot**
    - Start the bot using the following command:
      ```bash
@@ -87,7 +63,35 @@ curl -X POST http://your-linode-ip:5000/translate -H "Content-Type: application/
 #### 9. **Deploy and Maintain**
    - Once you have your code running smoothly on your own machine, transfer it to your server. To run the bot, use PM2.
 
-Heres a guide to install PM2 on your server/local machine:
+## Here’s a guide to install it on your server:
+ 
+1. **Create a Linode Server**:
+    - Deploy a new Linode instance with a Linux distribution like Debian 12 or Ubuntu 24.04 LTS. I'm using the $5 shared CPU server which is more than enough to run this bot.
+
+2. **Install Dependencies**:
+    - SSH into your Linode server and install the necessary dependencies, including Docker.
+
+```bash
+sudo apt-get update
+sudo apt-get install docker.io
+```
+
+3. **Run LibreTranslate**:
+    - Pull the LibreTranslate Docker image and run it.
+
+```bash
+sudo docker run -d -p 5000:5000 libretranslate/libretranslate
+```
+
+4. **Access the API**:
+    - The API will be accessible at `http://your-linode-ip:5000/translate`.
+
+To test to see if the API is working, you can run a CURL line:
+```bash
+ curl -X POST http://your-linode-ip:5000/translate -H "Content-Type: application/json" -d '{"q": "Hola", "source": "es", "target": "en"}'
+```
+
+## Heres a guide to install PM2 on your server/local machine:
 #### 1. **Install PM2 Globally**
    ```bash
    sudo npm install -g pm2
