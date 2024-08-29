@@ -330,7 +330,7 @@ async function translateText(text) {
         const confidence = data.detectedLanguage?.confidence;
         log(`Detected confidence: ${confidence}`);
 
-        // Skip translation if confidence is below 85%
+        // Skip translation if confidence is below 35%
         if (confidence !== undefined && confidence < 35) {
             log(`Translation skipped due to low confidence: ${confidence}`);
             return { translatedText: null, flagUrl: null, languageName: null };
