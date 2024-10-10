@@ -7,7 +7,8 @@
   "license": "MIT",
   "description": "A discord bot that auto translates message from users. Deletes the og message an replaces with an embed with the translated message.",
   "dependencies": {
-    "axios": "^1.7.3",
+    "axios": "^1.7.7",
+    "discord-translate-bot": "file:",
     "discord.js": "^14.15.3",
     "dotenv": "^16.4.5",
     "langdetect": "^0.2.1",
