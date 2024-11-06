@@ -251,7 +251,15 @@ client.on('messageCreate', async (message) => {
         
                 message.channel.send({ embeds: [embed] });
             }
-            // !!!!
+             
+            if (command === 'rmbl') {
+                const channelId = args[0];
+                if (!blacklist[message.guild.id].includes(channelId)) {
+                    return message.reply(`Channel ${channelId} is not blacklisted.`);
+                }
+
+                
+            }
 
             return; // Exit after handling a command
         }
