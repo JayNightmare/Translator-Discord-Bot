@@ -1,5 +1,2 @@
-/.env
 /node_modules
-testindex.mjs
-bot.log
-blacklist.json
+.env
