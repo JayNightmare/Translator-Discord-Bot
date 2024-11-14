@@ -103,3 +103,8 @@ function getLanguageName(languageCode) {
 
     return languageMap[languageCode] || "Unknown Language";
 }
+
+module.exports = {
+    getFlagUrl,
+    getLanguageName,
+};
