@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const serverSchema = new mongoose.Schema({
-    serverId: { type: String, ref: "ServerId", required: true, foreignKey: "serverId" },
+    serverId: { type: String, ref: "serverId", required: true, foreignKey: "serverId" },
     // // //
     blacklistedChannels: { type: String, required: false, default: [] },
     allowedChannels: { type: String, required: false, default: [] },
@@ -12,8 +12,3 @@ const serverSchema = new mongoose.Schema({
 });
 
 module.exports = mongoose.model("Settings", serverSchema);
-
-
-
-
-
