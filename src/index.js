@@ -1,12 +1,10 @@
 import { Client, GatewayIntentBits, Collection } from 'discord.js';
 import fs from 'fs';
-import mongoose from 'mongoose';
 import { BOT_TOKEN } from './config/config.js';
 import { log } from './utils/logger.js';
+import { connectToDatabase } from './utils/utils-database.js';
 
-const client = new Client({
-    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent]
-});
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
 
 client.commands = new Collection();
 
@@ -29,9 +27,6 @@ for (const file of eventFiles) {
     }
 }
 
-// MongoDB Connection
-mongoose.connect('mongodb://localhost:27017/yourdb', { useNewUrlParser: true, useUnifiedTopology: true })
-    .then(() => log('Connected to MongoDB'))
-    .catch(error => log(`MongoDB connection error: ${error.message}`));
+connectToDatabase();
 
 client.login(BOT_TOKEN);
