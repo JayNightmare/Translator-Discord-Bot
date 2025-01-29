@@ -87,8 +87,6 @@ This is a discord bot that in short, translates messages on Discord. The bot gra
 
 
 ### Built With
-* [![HTML][HTML]][HTML-url]
-* [![CSS][CSS]][CSS-url]
 * [![JavaScript][JavaScript]][JavaScript-url]
 * [![Discord.js][Discord.js]][Discord.js-url]
 
