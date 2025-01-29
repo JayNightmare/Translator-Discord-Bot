@@ -16,7 +16,7 @@ for (const file of commandFiles) {
     log(`Loaded command: ${command.name}`);
 }
 
-// Load events dynamically
+// Load events dynamically 
 const eventFiles = fs.readdirSync('./src/events').filter(file => file.endsWith('.js'));
 for (const file of eventFiles) {
     const event = require(`./events/${file}`);
