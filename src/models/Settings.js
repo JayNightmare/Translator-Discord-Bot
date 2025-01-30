@@ -6,7 +6,7 @@ const serverSchema = new mongoose.Schema({
     allowedChannels: { type: String, required: false, default: [] },
     loggingChannelId: { type: String, required: false, default: null },
     // // //
-    languageTo: { type: String, required: false, default: null },
+    languageTo: { type: String, required: false, default: 'english' },
     languageFrom: { type: String, required: false, default: null },
 });
 

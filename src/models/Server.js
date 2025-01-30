@@ -5,7 +5,8 @@ const serverSchema = new mongoose.Schema({
     name: { type: String, required: true },
     memberCount: { type: Number, required: 0 },
     // //
-    ownerId: { type: mongoose.Schema.Types.ObjectId, required: false, default: null }
+    ownerId: { type: String, required: false, default: null },
+    _id: { type: mongoose.Schema.Types.ObjectId, required: false, default: null },
 });
 
 module.exports = mongoose.model("Server", serverSchema);
