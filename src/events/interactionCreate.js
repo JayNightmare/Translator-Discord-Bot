@@ -17,7 +17,7 @@ module.exports = {
             try {
                 await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
             } catch (replyError) {
-                console.error(`Error sending error reply:`, replyError);
+                console.error(`(error #%d) Error sending error reply:`, replyError);
             }
         }
     },

@@ -17,7 +17,7 @@ module.exports= {
             return interaction.reply({ content: 'Please select a text channel.', ephemeral: true });
         }
 
-        const serverId = interaction.guildId;
+        const serverId = interaction.serverId;
 
         try {
             const server = await Server.findOne({ where: { serverId } });

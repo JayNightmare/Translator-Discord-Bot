@@ -28,7 +28,7 @@ module.exports = {
             }
 
             // Handle translation logic for normal messages
-            const blacklistedChannels = await Blacklist.find({ guildId: message.guild.id }).exec();
+            const blacklistedChannels = await Blacklist.find({ serverId: message.guild.id }).exec();
             const isBlacklisted = blacklistedChannels.some(
                 (channel) => channel.channelId === message.channel.id
             );

@@ -58,7 +58,7 @@ module.exports = {
             console.log('Successfully registered application (/) commands.');
     
         } catch (error) {
-            console.error('Error fetching guilds:', error);
+            console.error('(error #%d) Error fetching guilds:', error);
         }
     },
 };
