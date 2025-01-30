@@ -52,7 +52,13 @@
   </p>
 </div>
 
-
+<div align="center">
+  
+  #### Source Code
+  [![Discord Bot][Discord-Bot]][Discord-Bot-url]
+  [![TALE][TALE-website]][TALE-url]
+  
+</div>
 
 <!-- TABLE OF CONTENTS -->
 <details>
@@ -220,3 +226,9 @@ Distributed under the CC0 1.0. See [`LICENSE.txt`](https://github.com/JayNightma
 <!-- // -->
 [CSS]: https://img.shields.io/badge/CSS-darkblue?style=for-the-badge&logo=css&logoColor=white
 [CSS-url]: https://www.w3schools.com/css/
+<!-- // -->
+[Discord-Bot]: https://img.shields.io/badge/-Discord_Bot-black.svg?style=for-the-badge&logo=linkedin&colorB=555
+[Discord-Bot-url]: https://github.com/JayNightmare/Translator-Discord-Bot
+<!-- // -->
+[TALE-website]: https://img.shields.io/badge/-T.A.L.E-black.svg?style=for-the-badge&logo=linkedin&colorB=555
+[TALE-url]: https://github.com/JayNightmare/TALE-FYP
