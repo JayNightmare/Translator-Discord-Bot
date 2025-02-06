@@ -4,7 +4,18 @@ const { DISCORD_TOKEN } = require('./config/config.js');
 const { log } = require('./utils/utils-logger.js');
 const { connectToDatabase } = require('./utils/utils-database.js');
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
+const client = new Client({
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent,
+        GatewayIntentBits.GuildMembers,
+        GatewayIntentBits.GuildMessageReactions,
+        GatewayIntentBits.GuildVoiceStates,
+        GatewayIntentBits.GuildPresences,
+    ],
+    partials: ["MESSAGE", "CHANNEL", "REACTION"],
+});
 
 client.commands = new Collection();
 

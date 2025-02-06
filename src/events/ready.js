@@ -1,64 +1,80 @@
-// src/events/ready.js
-const { Client, PermissionsBitField, SlashCommandBuilder, ChannelType, GatewayIntentBits, REST, Routes, Events, ActivityType } = require('discord.js');
-const { DISCORD_TOKEN } = require('../configs/config');
-
+const { REST, Routes, ActivityType } = require('discord.js');
+const { DISCORD_TOKEN } = require('../config/config.js');
 const fs = require('fs');
+const Server = require('../models/Server.js');
 
 module.exports = {
     name: 'ready',
-    run: 'once',
     async execute(client) {
         console.log(`Logged in as ${client.user.tag}`);
 
         client.user.setActivity('Server Mode', { type: ActivityType.Watching });
         client.user.setStatus('dnd');
 
-        const commands = [];
-        const commandFiles = fs.readdirSync('./src/commands').filter(file => file.endsWith('.js'));
+        if (!DISCORD_TOKEN) {
+            console.error("❌ DISCORD_TOKEN is missing! Check your .env file.");
+            process.exit(1);
+        }
 
+        const rest = new REST({ version: '10' }).setToken(DISCORD_TOKEN);
+        const commands = [];
+
+        // Load all command files
+        const commandFiles = fs.readdirSync('./src/commands').filter(file => file.endsWith('.js'));
         for (const file of commandFiles) {
             const command = require(`../commands/${file}`);
             commands.push(command.data.toJSON());
         }
 
-        const rest = new REST({ version: '10' }).setToken(DISCORD_TOKEN);
-
         try {
-            // Fetch all guilds (servers) the bot is in
+            console.log('Started refreshing application (/) commands.');
+
+            // Fetch all guilds the bot is in
             const guilds = await client.guilds.fetch();
-    
-            // Log an event for each server the bot is in
-            guilds.forEach(async (guild) => {
+
+            for (const guild of guilds.values()) {
                 const serverId = guild.id;
-    
+
                 try {
-                    // Check if the server exists in the database
-                    let server = await Server.findOne({ where: { serverId } });
-                    
+                    const fullGuild = await guild.fetch();
+                    const memberCount = fullGuild.memberCount;
+                    const ownerId = fullGuild.ownerId;
+                    console.log(`>> Server ${guild.name} (${serverId}) has ${memberCount} members and is owned by ${ownerId}.`);
+
+                    let server = await Server.findOne({ serverId });
+
                     if (!server) {
-                        // If not, create a new entry for the server
-                        server = await Server.create({ serverId });
+                        server = await Server.create({
+                            serverId,
+                            name: fullGuild.name,
+                            memberCount,
+                            ownerId
+                        });
                         console.log(`Added server ${guild.name} (${serverId}) to the database.`);
                     } else {
                         console.log(`Server ${guild.name} (${serverId}) already exists in the database.`);
+                        await Server.updateOne({ serverId }, {
+                            name: fullGuild.name,
+                            memberCount,
+                            ownerId
+                        });
                     }
-    
-                    // Register commands for the guild
+
+                    // Register slash commands for the guild
                     await rest.put(
                         Routes.applicationGuildCommands(client.user.id, serverId),
                         { body: commands }
                     );
-    
+
+                    console.log(`Successfully registered commands for guild: ${serverId}`);
                 } catch (error) {
-                    console.error(`Error registering commands or adding server ${guild.name} (${serverId}) to the database:`, error);
+                    console.error(`Error registering commands or adding server ${serverId}:`, error);
                 }
-            });
-    
-            console.log('All servers initialized in the database.');
-            console.log('Successfully registered application (/) commands.');
-    
+            }
+
+            console.log('Successfully reloaded application (/) commands.');
         } catch (error) {
-            console.error('(error #%d) Error fetching guilds:', error);
+            console.error('Error fetching guilds:', error);
         }
     },
 };

@@ -10,4 +10,5 @@ const serverSchema = new mongoose.Schema({
     languageFrom: { type: String, required: false, default: null },
 });
 
-module.exports = mongoose.model("Settings", serverSchema);
+const Settings = mongoose.model("Settings", serverSchema);
+module.exports = Settings;

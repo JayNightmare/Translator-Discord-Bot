@@ -1,12 +1,11 @@
 const mongoose = require("mongoose");
 
 const serverSchema = new mongoose.Schema({
-    serverId: { type: String, ref: "serverId", required: true, primaryKey: true },
-    name: { type: String, required: true },
-    memberCount: { type: Number, required: 0 },
-    // //
-    ownerId: { type: String, required: false, default: null },
-    _id: { type: mongoose.Schema.Types.ObjectId, required: false, default: null },
+    serverId: { type: Number, ref: "serverId", required: true, primaryKey: true },
+    name: { type: String, required: false, default: '> No Server Name <' },
+    memberCount: { type: Number, required: false, default: 0 },
+    ownerId: { type: Number, required: false, default: null },
 });
 
-module.exports = mongoose.model("Server", serverSchema);
+const Server = mongoose.model("Server", serverSchema);
+module.exports = Server;

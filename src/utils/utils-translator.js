@@ -3,7 +3,7 @@ const {
     getLanguageName
 } = require('./utils-getHolder.js');
 
-const API_URL = require('../configs/config.js').API_URL;
+const { API_URL } = require( '../config/config.js');
 
 function shouldTranslate(messageContent) {
     const words = messageContent.split(/\s+/);

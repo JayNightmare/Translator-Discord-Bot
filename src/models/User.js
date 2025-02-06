@@ -11,4 +11,5 @@ const serverSchema = new mongoose.Schema({
     languageFromId: { type: String, required: false, default: [] }, // Include language from and channel ID, if not specified keep null
 });
 
-module.exports = mongoose.model("Users", serverSchema);
+const Users = mongoose.model("Users", serverSchema);
+module.exports = Users;

@@ -1,7 +1,7 @@
-const fetch = require( 'node-fetch');
+// const fetch = require( 'node-fetch');
 const { API_URL } = require( '../config/config.js');
 
-export async function translateText(text) {
+async function translateText(text) {
     try {
         const response = await fetch(API_URL, {
             method: 'POST',
@@ -22,3 +22,5 @@ export async function translateText(text) {
         return { translatedText: null, languageCode: null, confidence: 0 };
     }
 }
+
+module.exports = { translateText };

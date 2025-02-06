@@ -2,7 +2,7 @@ const { translateText } = require( '../services/translateServices.js');
 const { cleanMessage, shouldTranslate } = require( './utils-translator.js');
 const { log } = require( './utils-logger.js');
 
-export async function handleTranslateCommand(message, ignoreWords) {
+async function handleTranslateCommand(message, ignoreWords) {
     const cleanedContent = cleanMessage(message.content);
 
     if (!shouldTranslate(cleanedContent, ignoreWords)) {
@@ -30,3 +30,5 @@ export async function handleTranslateCommand(message, ignoreWords) {
         log('Message translated and sent successfully.');
     }
 }
+
+module.exports = { handleTranslateCommand };
