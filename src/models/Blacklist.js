@@ -8,4 +8,6 @@ const blacklistSchema = new mongoose.Schema({
     // // //
 });
 
-module.exports = mongoose.model("Blacklist", blacklistSchema);
+const Blacklist = mongoose.model("Blacklist", blacklistSchema);
+
+module.exports = Blacklist;

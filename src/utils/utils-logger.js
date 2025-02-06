@@ -1,16 +1,19 @@
-import fs from 'fs';
-import path from 'path';
+const fs = require('fs');
+const path = require('path');
 
-const logFilePath = path.join('logs', 'bot.log');
+// const __dirname = path.dirname(require.main.filename);
 
-// Ensure the logs directory exists
-if (!fs.existsSync('../logs')) fs.mkdirSync('../logs');
+const logsDir = path.join(__dirname, 'logs');
+if (!fs.existsSync(logsDir)) fs.mkdirSync(logsDir, { recursive: true });
 
+const logFilePath = path.join(logsDir, 'bot.log');
 const logStream = fs.createWriteStream(logFilePath, { flags: 'a' });
 
-export function log(message) {
+function log(message) {
     const timestamp = new Date().toISOString();
     const logMessage = `[${timestamp}] ${message}`;
     logStream.write(`${logMessage}\n`);
     console.log(logMessage);
 }
+
+module.exports = { log };

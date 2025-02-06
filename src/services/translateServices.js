@@ -1,5 +1,5 @@
-import fetch from 'node-fetch';
-import { API_URL } from '../config/config.js';
+const fetch = require( 'node-fetch');
+const { API_URL } = require( '../config/config.js');
 
 export async function translateText(text) {
     try {

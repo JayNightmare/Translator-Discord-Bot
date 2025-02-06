@@ -3,7 +3,6 @@
   "version": "0.0.5",
   "description": "Translation Discord Bot",
   "main": "./src/index.js",
-  "type": "module",
   "dependencies": {
     "bson": "^6.10.1",
     "debug": "^4.3.7",

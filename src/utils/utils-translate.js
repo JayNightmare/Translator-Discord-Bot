@@ -1,6 +1,6 @@
-import { translateText } from '../services/translateServices.js';
-import { cleanMessage, shouldTranslate } from './utils-translator.js';
-import { log } from './utils-logger.js';
+const { translateText } = require( '../services/translateServices.js');
+const { cleanMessage, shouldTranslate } = require( './utils-translator.js');
+const { log } = require( './utils-logger.js');
 
 export async function handleTranslateCommand(message, ignoreWords) {
     const cleanedContent = cleanMessage(message.content);

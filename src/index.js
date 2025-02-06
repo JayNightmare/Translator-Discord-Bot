@@ -1,15 +1,15 @@
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
-import fs from 'fs';
-import { DISCORD_TOKEN } from './config/config.js';
-import { log } from './utils/utils-logger.js';
-import { connectToDatabase } from './utils/utils-database.js';
+const fs = require('fs');
+const { DISCORD_TOKEN } = require('./config/config.js');
+const { log } = require('./utils/utils-logger.js');
+const { connectToDatabase } = require('./utils/utils-database.js');
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
 
 client.commands = new Collection();
 
 try {
-    // Load commands dynamically
+    log(`// ############################## //`);
     const commandFiles = fs.readdirSync('./src/commands').filter(file => file.endsWith('.js'));
     for (const file of commandFiles) {
         const command = require(`./commands/${file}`);
@@ -17,19 +17,26 @@ try {
         log(`Loaded command: ${command.name}`);
     }
 
-    // Load events dynamically
+    log(`>> Preparing to load all events`);
     const eventFiles = fs.readdirSync('./src/events').filter(file => file.endsWith('.js'));
+    log(`>> Found ${eventFiles.length} events to load`);
     for (const file of eventFiles) {
+        log(`>> Loading event file: ${file}`);
         const event = require(`./events/${file}`);
+        log(`Loaded event: ${event.name}`);
         if (event.once) {
+            log(`>> Registering one-time event: ${event.name}`);
             client.once(event.name, (...args) => event.execute(...args, client));
         } else {
+            log(`>> Registering recurring event: ${event.name}`);
             client.on(event.name, (...args) => event.execute(...args, client));
         }
     }
     connectToDatabase();
-} catch (err) {
-    console.error(`(error #%d) Error occured during start up`, error)
+} catch (error) {
+    log(`(error #%d) Error occured during start up ${error}`);
+    log(`// ############################## //`);
+    console.error(`(error #%d) Error occured during start up ${error}`)
 }
 
 client.login(DISCORD_TOKEN);

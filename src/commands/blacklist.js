@@ -2,6 +2,7 @@ const { SlashCommandBuilder } = require("discord.js");
 const Server = require("../models/Server");
 
 module.exports= {
+    name: 'blacklist',
     data: new SlashCommandBuilder()
     .setName('blacklist')
     .setDescription('Set the log channel for the server')

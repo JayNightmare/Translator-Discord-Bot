@@ -1,8 +1,8 @@
-import { commandPrefix } from '../config/config.js';
-import { log } from '../utils/utils-logger.js';
-import IgnoreWord from '../models/ignoreWordsModel.js';
-import Blacklist from '../models/Blacklist.js';
-import { handleTranslateCommand } from '../utils/utils-translate.js';
+const { commandPrefix } = require('../config/config.js');
+const { log } = require('../utils/utils-logger.js');
+const IgnoreWord = require('../models/ignoreWordsModel.js');
+const Blacklist = require('../models/Blacklist.js');
+const { handleTranslateCommand } = require('../utils/utils-translate.js');
 
 module.exports = {
     name: 'messageCreate',
@@ -18,13 +18,11 @@ module.exports = {
 
                 const command = message.client.commands.get(commandName);
                 if (!command) {
-                    log(`Command "${commandName}" not found.`);
-                    return;
+                    return log(`Command "${commandName}" not found.`);
                 }
 
                 await command.execute(message, args);
-                log(`Executed command: ${commandName}`);
-                return;
+                return log(`Executed command: ${commandName}`);
             }
 
             // Handle translation logic for normal messages
@@ -34,11 +32,10 @@ module.exports = {
             );
 
             if (isBlacklisted) {
-                log(`Message in blacklisted channel (${message.channel.id}) ignored.`);
-                return;
+                return log(`Message in blacklisted channel (${message.channel.id}) ignored.`);
             }
 
-            // Fetch ignore words from the database
+            // Fetch ignore words = require( the database
             const ignoreWordsDocs = await IgnoreWord.find({}).exec();
             const ignoreWords = ignoreWordsDocs.map((doc) => doc.word);
 

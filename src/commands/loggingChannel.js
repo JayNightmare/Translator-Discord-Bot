@@ -2,6 +2,7 @@ const { SlashCommandBuilder } = require("discord.js");
 const Server = require("../models/Server");
 
 module.exports= {
+    name: 'log-channel',
     data: new SlashCommandBuilder()
     .setName('log-channel')
     .setDescription('Set the log channel for the server')
