@@ -1,6 +1,6 @@
 import { Client, GatewayIntentBits, Collection } from 'discord.js';
 import fs from 'fs';
-import { log } from './utils/logger.js';
+import { log } from './utils/utils-logger.js';
 
 const { ensureServerData, ensureUserData } = require('../utils/utils-ensureData.js');
 

@@ -1,7 +1,7 @@
-import { Client, GatewayIntentBits, Collection } from 'discord.js';
+const { Client, GatewayIntentBits, Collection } = require('discord.js');
 import fs from 'fs';
-import { BOT_TOKEN } from './config/config.js';
-import { log } from './utils/logger.js';
+import { DISCORD_TOKEN } from './config/config.js';
+import { log } from './utils/utils-logger.js';
 import { connectToDatabase } from './utils/utils-database.js';
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
@@ -17,7 +17,7 @@ try {
         log(`Loaded command: ${command.name}`);
     }
 
-    // Load events dynamically 
+    // Load events dynamically
     const eventFiles = fs.readdirSync('./src/events').filter(file => file.endsWith('.js'));
     for (const file of eventFiles) {
         const event = require(`./events/${file}`);
@@ -32,7 +32,4 @@ try {
     console.error(`(error #%d) Error occured during start up`, error)
 }
 
-
-
-
-client.login(BOT_TOKEN);
+client.login(DISCORD_TOKEN);

@@ -1,5 +1,5 @@
 import { commandPrefix } from '../config/config.js';
-import { log } from '../utils/logger.js';
+import { log } from '../utils/utils-logger.js';
 import IgnoreWord from '../models/ignoreWordsModel.js';
 import Blacklist from '../models/Blacklist.js';
 import { handleTranslateCommand } from '../utils/utils-translate.js';

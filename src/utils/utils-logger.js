@@ -4,7 +4,7 @@ import path from 'path';
 const logFilePath = path.join('logs', 'bot.log');
 
 // Ensure the logs directory exists
-if (!fs.existsSync('logs')) fs.mkdirSync('logs');
+if (!fs.existsSync('../logs')) fs.mkdirSync('../logs');
 
 const logStream = fs.createWriteStream(logFilePath, { flags: 'a' });
 
