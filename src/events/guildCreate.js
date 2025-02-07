@@ -12,15 +12,15 @@ module.exports = {
         client.commands = new Collection();
 
         try {
-            console.log(`>> Prep for fetching members from server`);
+            log(`>> Prep for fetching members from server`);
             // Fetch all members of the guild
             await guild.members.fetch(); // Ensure members are cached
 
-            console.log(`>> Ensuring Data`);
+            log(`>> Ensuring Data`);
             // Ensure server data is initialized
             await ensureServerData(serverId, guild);
 
-            console.log(`>> Fetching all members in the server`);
+            log(`>> Fetching all members in the server`);
             // Loop through each member in the guild
             guild.members.cache.forEach(async (member) => {
                 const userId = member.id;
@@ -29,7 +29,7 @@ module.exports = {
                 await ensureUserData(serverId, userId);
             });
             
-            console.log(`>> Preparing to load all commands`);
+            log(`>> Preparing to load all commands`);
             // Load commands dynamically
             const commandFiles = fs.readdirSync('./src/commands').filter(file => file.endsWith('.js'));
             for (const file of commandFiles) {
@@ -38,7 +38,7 @@ module.exports = {
                 log(`Loaded command: ${command.name}`);
             }
             
-            console.log(`>> Preparing to load all events`);
+            log(`>> Preparing to load all events`);
             // Load events dynamically 
             const eventFiles = fs.readdirSync('./src/events').filter(file => file.endsWith('.js'));
             for (const file of eventFiles) {
@@ -50,12 +50,12 @@ module.exports = {
                 }
             }
 
-            console.log(`>> Storing owner and member information`);
+            log(`>> Storing owner and member information`);
             // Store owner and member information in the database
             const ownerId = guild.ownerId;
             const memberCount = guild.memberCount;
 
-            console.log(`>> Saving Server Data`);
+            log(`>> Saving Server Data`);
             await saveOwnerData(serverId, ownerId, memberCount);
         } catch (err) {
             console.error(`(error #%d) Error occured when rendering a new server: `, err);

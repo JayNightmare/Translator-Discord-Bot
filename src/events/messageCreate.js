@@ -35,7 +35,6 @@ module.exports = {
                 return log(`Message in blacklisted channel (${message.channel.id}) ignored.`);
             }
 
-            // Fetch ignore words = require( the database
             const ignoreWordsDocs = await IgnoreWord.find({}).exec();
             const ignoreWords = ignoreWordsDocs.map((doc) => doc.word);
 

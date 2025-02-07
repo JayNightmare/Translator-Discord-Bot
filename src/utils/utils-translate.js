@@ -1,5 +1,5 @@
 const { translateText } = require( '../services/translateServices.js');
-const { cleanMessage, shouldTranslate } = require( './utils-translator.js');
+const { cleanMessage, shouldTranslate } = require( './utils-messageUtils.js');
 const { log } = require( './utils-logger.js');
 
 async function handleTranslateCommand(message, ignoreWords) {

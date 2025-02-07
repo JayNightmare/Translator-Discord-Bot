@@ -1,10 +1,12 @@
+const { log } = require('../utils/utils-logger');
+
 module.exports = {
     name: 'interactionCreate',
     async execute(interaction, sessionData) {
-        console.log(`Interaction received: ${interaction.type}`);
+        log(`Interaction received: ${interaction.type}`);
 
         if (interaction.isCommand()) {
-            console.log(`Command interaction: ${interaction.commandName}`);
+            log(`Command interaction: ${interaction.commandName}`);
             const command = interaction.client.commands.get(interaction.commandName);
 
             if (!command) {
@@ -14,7 +16,7 @@ module.exports = {
 
             try {
                 await command.execute(interaction, sessionData);
-                console.log(`Command ${interaction.commandName} executed successfully.`);
+                log(`Command ${interaction.commandName} executed successfully.`);
             } catch (error) {
                 console.error(`Error executing command ${interaction.commandName}:`, error);
                 try {
@@ -30,13 +32,13 @@ module.exports = {
         }
         
         else if (interaction.isButton()) {
-            console.log(`Button interaction: ${interaction.customId}`);
+            log(`Button interaction: ${interaction.customId}`);
             const button = interaction.client.buttons?.get(interaction.customId);
             if (!button) return console.warn(`No button handler found for ${interaction.customId}.`);
 
             try {
                 await button.execute(interaction, sessionData);
-                console.log(`Button ${interaction.customId} executed successfully.`);
+                log(`Button ${interaction.customId} executed successfully.`);
             } catch (error) {
                 console.error(`Error executing button ${interaction.customId}:`, error);
                 try {
@@ -48,13 +50,13 @@ module.exports = {
         }
         
         else if (interaction.isSelectMenu()) {
-            console.log(`Select menu interaction: ${interaction.customId}`);
+            log(`Select menu interaction: ${interaction.customId}`);
             const selectMenu = interaction.client.selectMenus?.get(interaction.customId);
             if (!selectMenu) return console.warn(`No select menu handler found for ${interaction.customId}.`);
 
             try {
                 await selectMenu.execute(interaction, sessionData);
-                console.log(`Select menu ${interaction.customId} executed successfully.`);
+                log(`Select menu ${interaction.customId} executed successfully.`);
             } catch (error) {
                 console.error(`Error executing select menu ${interaction.customId}:`, error);
                 try {

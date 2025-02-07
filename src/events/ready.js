@@ -2,11 +2,12 @@ const { REST, Routes, ActivityType } = require('discord.js');
 const { DISCORD_TOKEN } = require('../config/config.js');
 const fs = require('fs');
 const Server = require('../models/Server.js');
+const { log } = require('../utils/utils-logger.js');
 
 module.exports = {
     name: 'ready',
     async execute(client) {
-        console.log(`Logged in as ${client.user.tag}`);
+        log(`Logged in as ${client.user.tag}`);
 
         client.user.setActivity('Server Mode', { type: ActivityType.Watching });
         client.user.setStatus('dnd');
@@ -27,7 +28,7 @@ module.exports = {
         }
 
         try {
-            console.log('Started refreshing application (/) commands.');
+            log('Started refreshing application (/) commands.');
 
             // Fetch all guilds the bot is in
             const guilds = await client.guilds.fetch();
@@ -39,7 +40,7 @@ module.exports = {
                     const fullGuild = await guild.fetch();
                     const memberCount = fullGuild.memberCount;
                     const ownerId = fullGuild.ownerId;
-                    console.log(`>> Server ${guild.name} (${serverId}) has ${memberCount} members and is owned by ${ownerId}.`);
+                    log(`>> Server ${guild.name} (${serverId}) has ${memberCount} members and is owned by ${ownerId}.`);
 
                     let server = await Server.findOne({ serverId });
 
@@ -50,9 +51,9 @@ module.exports = {
                             memberCount,
                             ownerId
                         });
-                        console.log(`Added server ${guild.name} (${serverId}) to the database.`);
+                        log(`Added server ${guild.name} (${serverId}) to the database.`);
                     } else {
-                        console.log(`Server ${guild.name} (${serverId}) already exists in the database.`);
+                        log(`Server ${guild.name} (${serverId}) already exists in the database.`);
                         await Server.updateOne({ serverId }, {
                             name: fullGuild.name,
                             memberCount,
@@ -66,13 +67,13 @@ module.exports = {
                         { body: commands }
                     );
 
-                    console.log(`Successfully registered commands for guild: ${serverId}`);
+                    log(`Successfully registered commands for guild: ${serverId}`);
                 } catch (error) {
                     console.error(`Error registering commands or adding server ${serverId}:`, error);
                 }
             }
 
-            console.log('Successfully reloaded application (/) commands.');
+            log('Successfully reloaded application (/) commands.');
         } catch (error) {
             console.error('Error fetching guilds:', error);
         }
