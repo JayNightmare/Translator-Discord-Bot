@@ -1,36 +1,56 @@
 const { SlashCommandBuilder } = require("discord.js");
-const Server = require("../models/Server");
+const Blacklist = require("../models/Blacklist");
 
-module.exports= {
+module.exports = {
     name: 'blacklist',
     data: new SlashCommandBuilder()
-    .setName('blacklist')
-    .setDescription('Set the log channel for the server')
-    // ! Add Choice for either channel or item input
-    ,
+        .setName('blacklist')
+        .setDescription('Blacklist one or more channels from translation')
+        .addChannelOption(option =>
+            option.setName('channels')
+                .setDescription('The channels to blacklist')
+                .setRequired(true)
+        ),
     async execute(interaction) {
-        const channel = interaction.options.getChannel('channel');
+        const channels = interaction.options.getChannel('channels', true);
+        const serverId = interaction.guild.id;
 
-        if (channel.type !== 0) {
-            return interaction.reply({ content: 'Please select a text channel.', ephemeral: true });
+        // Ensure all provided channels are text channels
+        const invalidChannels = channels.filter(ch => ch.type !== 0);
+        if (invalidChannels.length > 0) {
+            return interaction.reply({
+                content: 'Please select only text channels.',
+                ephemeral: true
+            });
         }
 
-        const serverId = interaction.serverId;
-
         try {
-            const server = await Server.findOne({ where: { serverId } });
-
-            if (!server) {
-                return interaction.reply({ content: 'Server not found in the database.', ephemeral: true });
+            // Get or create blacklist entry for this server
+            let blacklist = await Blacklist.findOne({ serverId });
+            if (!blacklist) {
+                blacklist = new Blacklist({ serverId });
             }
 
-            server.logChannelId = channel.id;
-            await server.save();
+            // Add new channels to blacklist, avoiding duplicates
+            const channelIds = channels.map(ch => ch.id);
+            const uniqueChannels = [...new Set([
+                ...(blacklist.blacklistedChannels || []),
+                ...channelIds
+            ])];
 
-            interaction.reply({ content: `Log channel set to <#${channel.id}>`, ephemeral: true });
+            blacklist.blacklistedChannels = uniqueChannels;
+            await blacklist.save();
+
+            interaction.reply({
+                content: `Successfully blacklisted ${channels.length} channel(s) from translation.`,
+                ephemeral: true
+            });
         } catch (error) {
-            console.error('Error setting log channel:', error);
-            interaction.reply({ content: 'An error occurred while setting the log channel.', ephemeral: true });
+            console.error('Error updating blacklist:', error);
+            interaction.reply({
+                content: 'An error occurred while updating the blacklist.',
+                ephemeral: true
+            });
         }
     }
 }
