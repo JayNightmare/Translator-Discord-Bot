@@ -20,14 +20,20 @@ async function handleTranslateCommand(message, ignoreWords) {
             },
             description: translatedText,
             footer: {
-                text: `Original: ${message.content} | Language: ${languageName}`,
+                text: `Original: ${message.content.length > 50 ? message.content.substring(0, 50) + '...' : message.content} | Language: ${languageName}`,
             },
         };
 
         if (flagUrl) embed.thumbnail = { url: flagUrl };
 
         await message.channel.send({ embeds: [embed] });
-        log('Message translated and sent successfully.');
+        try {
+            await message.delete();
+            log('Message translated and original message deleted successfully.');
+        } catch (deleteError) {
+            log(`Error deleting message: ${deleteError.message}`);
+            // Continue even if deletion fails
+        }
     }
 }
 
