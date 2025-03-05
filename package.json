@@ -1,6 +1,6 @@
 {
   "name": "tale-discord-bot",
-  "version": "0.0.5",
+  "version": "0.4.2",
   "description": "Translation Discord Bot",
   "main": "./src/index.js",
   "dependencies": {
