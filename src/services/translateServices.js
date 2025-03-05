@@ -5,6 +5,11 @@ const {
     getLanguageName
 } = require('../utils/utils-getHolder.js');
 
+const {
+    translateWithRapidAPI,
+    translateWithLibreTranslate
+} = require('../utils/utils-translationProviders.js');
+
 const { RAPIDAPI_CONFIG } = require('../config/config.js');
 
 // Translation cache with expiration
@@ -38,10 +43,10 @@ async function detectLanguage(text) {
     try {
         const options = {
             method: 'POST',
-            url: RAPIDAPI_CONFIG.detectUrl,
+            url: RAPIDAPI_CONFIG.googleDetectUrl,
             headers: {
                 'x-rapidapi-key': RAPIDAPI_CONFIG.key,
-                'x-rapidapi-host': RAPIDAPI_CONFIG.host,
+                'x-rapidapi-host': RAPIDAPI_CONFIG.googleHost,
                 'Content-Type': 'application/json'
             },
             data: { q: text }
@@ -68,14 +73,14 @@ async function translateText(text, targetLanguage = 'en') {
                 return cached.result;
             }
         }
-        
+
         // First detect the source language
         const detection = await detectLanguage(text);
         const sourceLanguage = detection.data.detections[0][0].language;
         const confidence = detection.data.detections[0][0].confidence;
-        
+
         log(`Detected language: ${sourceLanguage} with confidence: ${confidence}`);
-        
+
         // ! Skip translation if confidence is below 35%
         if (confidence < 0.75) {
             log(`Translation skipped due to low confidence: ${confidence}`);
@@ -87,30 +92,47 @@ async function translateText(text, targetLanguage = 'en') {
             return { translatedText: null, flagUrl: null, languageName: null };
         }
 
-        const options = {
-            method: 'POST',
-            url: RAPIDAPI_CONFIG.translateUrl,
-            headers: {
-                'x-rapidapi-key': RAPIDAPI_CONFIG.key,
-                'x-rapidapi-host': RAPIDAPI_CONFIG.host,
-                'Content-Type': 'application/json'
-            },
-            data: {
-                q: text,
-                source: sourceLanguage,
-                target: targetLanguage,
-                format: 'text'
-            }
-        };
-
-        const response = await axios.request(options);
-        const translatedText = response.data.data.translations[0].translatedText;
+        let translatedText = null;
         
+        // 1️⃣ Try Google Translate (via RapidAPI)
+        try {
+            log('Attempting to translate with Google Translate');
+            translatedText = await translateWithRapidAPI(text, sourceLanguage, targetLanguage, 'google');
+            // translatedText = null;
+        } catch (error) {
+            log(`Google Translate failed: ${error.message}`);
+        }
+
+        // 2️⃣ If Google fails, try DeepL (via RapidAPI)
+        if (!translatedText) {
+            try {
+                log('Attempting to translate with DeepL');
+                translatedText = await translateWithRapidAPI(text, sourceLanguage, targetLanguage, 'deepl');
+            } catch (error) {
+                log(`DeepL Translate failed: ${error.message}`);
+            }
+        }
+
+        // 3️⃣ If both fail, try LibreTranslate
+        if (!translatedText) {
+            try {
+                log('Attempting to translate with LibreTranslate');
+                translatedText = await translateWithLibreTranslate(text, targetLanguage);
+            } catch (error) {
+                log(`LibreTranslate failed: ${error.message}`);
+            }
+        }
+
+        // 4️⃣ If ALL fail, return an error
+        if (!translatedText) {
+            throw new Error('All translation services failed');
+        }
+
         const flagUrl = getFlagUrl(sourceLanguage);
         const languageName = getLanguageName(sourceLanguage);
 
         const result = { translatedText, flagUrl, languageName };
-        
+
         // Update cache
         translationCache.set(cacheKey, {
             result,

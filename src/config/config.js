@@ -1,11 +1,15 @@
 require("dotenv").config();
 
 const RAPIDAPI_CONFIG = {
-    key: process.env.RAPIDAPI_KEY,
-    host: 'google-translator9.p.rapidapi.com',
-    detectUrl: 'https://google-translator9.p.rapidapi.com/v2/detect',
-    translateUrl: 'https://google-translator9.p.rapidapi.com/v2',
-    languagesUrl: 'https://google-translator9.p.rapidapi.com/v2/languages'
+    // ! Google API
+    key: process.env.API_KEY,
+    googleHost: 'google-translator9.p.rapidapi.com',
+    googleDetectUrl: 'https://google-translator9.p.rapidapi.com/v2/detect',
+    googleTranslateUrl: 'https://google-translator9.p.rapidapi.com/v2',
+    googlelanguagesUrl: 'https://google-translator9.p.rapidapi.com/v2/languages',
+    // ! Deepl API
+    deepLHost: 'deepl-translator2.p.rapidapi.com',
+    deepLUrl: 'https://deepl-translator2.p.rapidapi.com/translate',
 };
 
 module.exports = {

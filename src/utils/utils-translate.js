@@ -37,4 +37,6 @@ async function handleTranslateCommand(message, ignoreWords) {
     }
 }
 
-module.exports = { handleTranslateCommand };
+module.exports = {
+    handleTranslateCommand
+};
