@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require("discord.js");
+const { SlashCommandBuilder, MessageFlags } = require("discord.js");
 const Settings = require("../models/Settings");
 
 module.exports = {
@@ -37,13 +37,13 @@ module.exports = {
                 content: `Language settings updated:\n` +
                          `Translate from: ${languageFrom}\n` +
                          `Translate to: ${languageTo}`,
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         } catch (error) {
             console.error('Error updating language settings:', error);
             interaction.reply({
                 content: 'An error occurred while updating language settings.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
     }

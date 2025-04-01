@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require("discord.js");
+const { SlashCommandBuilder, MessageFlags } = require("discord.js");
 const Blacklist = require("../models/Blacklist");
 
 module.exports = {
@@ -20,7 +20,7 @@ module.exports = {
         if (invalidChannels.length > 0) {
             return interaction.reply({
                 content: 'Please select only text channels.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
 
@@ -43,13 +43,13 @@ module.exports = {
 
             interaction.reply({
                 content: `Successfully blacklisted ${channels.length} channel(s) from translation.`,
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         } catch (error) {
             console.error('Error updating blacklist:', error);
             interaction.reply({
                 content: 'An error occurred while updating the blacklist.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
     }

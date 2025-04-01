@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require("discord.js");
+const { SlashCommandBuilder, MessageFlags } = require("discord.js");
 const Server = require("../models/Server");
 
 module.exports= {
@@ -15,7 +15,7 @@ module.exports= {
         const channel = interaction.options.getChannel('channel');
 
         if (channel.type !== 0) {
-            return interaction.reply({ content: 'Please select a text channel.', ephemeral: true });
+            return interaction.reply({ content: 'Please select a text channel.', flags: MessageFlags.Ephemeral });
         }
 
         const serverId = interaction.serverId;
@@ -24,16 +24,16 @@ module.exports= {
             const server = await Server.findOne({ where: { serverId } });
 
             if (!server) {
-                return interaction.reply({ content: 'Server not found in the database.', ephemeral: true });
+                return interaction.reply({ content: 'Server not found in the database.', flags: MessageFlags.Ephemeral });
             }
 
             server.logChannelId = channel.id;
             await server.save();
 
-            interaction.reply({ content: `Log channel set to <#${channel.id}>`, ephemeral: true });
+            interaction.reply({ content: `Log channel set to <#${channel.id}>`, flags: MessageFlags.Ephemeral });
         } catch (error) {
             console.error('Error setting log channel:', error);
-            interaction.reply({ content: 'An error occurred while setting the log channel.', ephemeral: true });
+            interaction.reply({ content: 'An error occurred while setting the log channel.', flags: MessageFlags.Ephemeral });
         }
     }
 }

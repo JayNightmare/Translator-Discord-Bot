@@ -1,3 +1,4 @@
+const { MessageFlags } = require('discord.js');
 const { log } = require('../utils/utils-logger');
 
 module.exports = {
@@ -21,9 +22,9 @@ module.exports = {
                 console.error(`Error executing command ${interaction.commandName}:`, error);
                 try {
                     if (interaction.replied || interaction.deferred) {
-                        await interaction.followUp({ content: 'An error occurred while executing this command.', ephemeral: true });
+                        await interaction.followUp({ content: 'An error occurred while executing this command.', flags: MessageFlags.Ephemeral });
                     } else {
-                        await interaction.reply({ content: 'An error occurred while executing this command.', ephemeral: true });
+                        await interaction.reply({ content: 'An error occurred while executing this command.', flags: MessageFlags.Ephemeral });
                     }
                 } catch (replyError) {
                     console.error(`(error #%d) Error sending error reply:`, replyError);
@@ -42,7 +43,7 @@ module.exports = {
             } catch (error) {
                 console.error(`Error executing button ${interaction.customId}:`, error);
                 try {
-                    await interaction.reply({ content: 'An error occurred while processing this button.', ephemeral: true });
+                    await interaction.reply({ content: 'An error occurred while processing this button.', flags: MessageFlags.Ephemeral });
                 } catch (replyError) {
                     console.error(`(error #%d) Error sending button error reply:`, replyError);
                 }
@@ -60,7 +61,7 @@ module.exports = {
             } catch (error) {
                 console.error(`Error executing select menu ${interaction.customId}:`, error);
                 try {
-                    await interaction.reply({ content: 'An error occurred while processing this selection.', ephemeral: true });
+                    await interaction.reply({ content: 'An error occurred while processing this selection.', flags: MessageFlags.Ephemeral });
                 } catch (replyError) {
                     console.error(`(error #%d) Error sending select menu error reply:`, replyError);
                 }
