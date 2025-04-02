@@ -4,7 +4,7 @@ const { log } = require('../utils/utils-logger');
 async function registerServer(serverId, guild) {
     let server = await Server.findOne({ serverId, name: guild.name });
     if (!server) {
-        server = await Server.create({ serverId,  });
+        server = await Server.create({ serverId, name: guild.name });
         log(`New user registered: ${username}`);
     }
     return server;

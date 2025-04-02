@@ -46,7 +46,7 @@ module.exports = {
 
                     if (!server) {
                         server = await Server.create({
-                            serverId,
+                            serverId: serverId,
                             name: fullGuild.name,
                             memberCount,
                             ownerId
