@@ -35,10 +35,12 @@ module.exports = {
                 return log(`Message in blacklisted channel (${message.channel.id}) ignored.`);
             }
 
+            const serverId = message.guild.id;
+
             const ignoreWordsDocs = await IgnoreWord.find({}).exec();
             const ignoreWords = ignoreWordsDocs.map((doc) => doc.word);
 
-            await handleTranslateCommand(message, ignoreWords);
+            await handleTranslateCommand(message, ignoreWords, serverId);
         } catch (error) {
             log(`Error handling messageCreate event: ${error.message}`);
             console.error(error);

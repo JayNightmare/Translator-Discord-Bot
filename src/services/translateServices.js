@@ -11,6 +11,8 @@ const {
 } = require('../utils/utils-translationProviders.js');
 
 const { RAPIDAPI_CONFIG } = require('../config/config.js');
+const Settings = require('../models/Settings'); // Import Settings model
+const languageMap = require('../utils/languageMap'); // Import a mapping of full names to shorthand codes
 
 // Translation cache with expiration
 const translationCache = new Map();
@@ -60,10 +62,21 @@ async function detectLanguage(text) {
     }
 }
 
-async function translateText(text, targetLanguage = 'en') {
+async function translateText(text, serverId) {
     try {
         log(`Attempting to translate text: ${text}`);
         
+        // Fetch language settings from the database
+        const settings = await Settings.findOne({ serverId });
+        let targetLanguage = settings?.languageTo || 'en';
+        let sourceLanguageFromDb = settings?.languageFrom || 'auto';
+
+        log(`Settings for server ${serverId}: targetLanguage=${targetLanguage}, sourceLanguageFromDb=${sourceLanguageFromDb}`);
+
+        // Convert full language names to shorthand codes
+        targetLanguage = languageMap[targetLanguage.toLowerCase()] || targetLanguage;
+        sourceLanguageFromDb = languageMap[sourceLanguageFromDb.toLowerCase()] || sourceLanguageFromDb;
+
         // Check cache first
         const cacheKey = getCacheKey(text, targetLanguage);
         if (translationCache.has(cacheKey)) {
@@ -74,21 +87,20 @@ async function translateText(text, targetLanguage = 'en') {
             }
         }
 
-        // First detect the source language
-        const detection = await detectLanguage(text);
-        const sourceLanguage = detection.data.detections[0][0].language;
-        const confidence = detection.data.detections[0][0].confidence;
+        // Detect the source language if not specified in the database
+        const sourceLanguage = sourceLanguageFromDb === 'auto' 
+            ? (await detectLanguage(text)).data.detections[0][0].language 
+            : sourceLanguageFromDb;
+
+        const confidence = sourceLanguageFromDb === 'auto' 
+            ? (await detectLanguage(text)).data.detections[0][0].confidence 
+            : 1.0;
 
         log(`Detected language: ${sourceLanguage} with confidence: ${confidence}`);
 
-        // ! Skip translation if confidence is below 35%
-        if (confidence < 0.75) {
-            log(`Translation skipped due to low confidence: ${confidence}`);
-            return { translatedText: null, flagUrl: null, languageName: null };
-        }
-
-        if (sourceLanguage === targetLanguage) {
-            log(`Translation skipped because source and target languages are the same: ${sourceLanguage}`);
+        // Skip translation if confidence is below 75% or source and target languages are the same
+        if (confidence < 0.75 || sourceLanguage === targetLanguage) {
+            log(`Translation skipped due to low confidence or identical source and target languages.`);
             return { translatedText: null, flagUrl: null, languageName: null };
         }
 
@@ -98,7 +110,6 @@ async function translateText(text, targetLanguage = 'en') {
         try {
             log('Attempting to translate with Google Translate');
             translatedText = await translateWithRapidAPI(text, sourceLanguage, targetLanguage, 'google');
-            // translatedText = null;
         } catch (error) {
             log(`Google Translate failed: ${error.message}`);
         }
