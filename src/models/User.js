@@ -7,8 +7,8 @@ const serverSchema = new mongoose.Schema({
     username: { type: String, required: true },
     displayName: { type: String, required: false },
     // // //
-    languageToId: { type: String, required: false, default: [] }, // Include language to and channel ID, if not specified keep null
-    languageFromId: { type: String, required: false, default: [] }, // Include language from and channel ID, if not specified keep null
+    languageToId: { type: [String], required: false, default: [] }, // Include language to and channel ID, if not specified keep null
+    languageFromId: { type: [String], required: false, default: [] }, // Include language from and channel ID, if not specified keep null
 });
 
 const Users = mongoose.model("Users", serverSchema);
