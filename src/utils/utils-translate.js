@@ -62,7 +62,6 @@ async function handleTranslateCommand(message, ignoreWords, serverId) {
             log('Message translated and original message deleted successfully.');
         } catch (deleteError) {
             log(`Error deleting message: ${deleteError.message}`);
-            // Continue even if deletion fails
         }
     }
 }

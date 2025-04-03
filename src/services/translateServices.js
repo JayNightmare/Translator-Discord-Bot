@@ -88,12 +88,12 @@ async function translateText(text, serverId) {
         }
 
         // Detect the source language if not specified in the database
-        const sourceLanguage = sourceLanguageFromDb === 'auto' 
-            ? (await detectLanguage(text)).data.detections[0][0].language 
+        const sourceLanguage = sourceLanguageFromDb === 'auto'
+            ? (await detectLanguage(text)).data.detections[0][0].language
             : sourceLanguageFromDb;
 
-        const confidence = sourceLanguageFromDb === 'auto' 
-            ? (await detectLanguage(text)).data.detections[0][0].confidence 
+        const confidence = sourceLanguageFromDb === 'auto'
+            ? (await detectLanguage(text)).data.detections[0][0].confidence
             : 1.0;
 
         log(`Detected language: ${sourceLanguage} with confidence: ${confidence}`);
