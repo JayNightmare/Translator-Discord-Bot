@@ -6,33 +6,34 @@ const Settings = require('../models/Settings.js');
 const { handleTranslateCommand } = require('../utils/utils-translate.js');
 const { detectLanguage } = require('../services/translateServices.js');
 const { EmbedBuilder } = require('discord.js');
+const { languageMap } = require('../utils/languageMap.js');
 
 module.exports = {
     name: 'messageCreate',
     async execute(message) {
-        // Ignore bot messages
+        // ! Ignore bot messages
         if (message.author.bot) return;
 
         try {
             const serverId = message.guild.id;
             const blacklist = await Blacklist.findOne({ serverId });
 
-            // Fetch logging channel ID from Settings schema
+            // * Fetch logging channel ID from Settings schema
             const settings = await Settings.findOne({ serverId });
             const loggingChannelId = settings?.loggingChannelId;
 
-            // Check for blacklisted channels
+            // * Check for blacklisted channels
             if (blacklist?.blacklistedChannels.includes(message.channel.id)) {
                 return log(`Message in blacklisted channel (${message.channel.id}) ignored.`);
             }
 
-            // Check for blacklisted roles
+            // * Check for blacklisted roles
             const memberRoles = message.member?.roles.cache.map(role => role.id) || [];
             if (blacklist?.blacklistedRoles.some(roleId => memberRoles.includes(roleId))) {
                 return log(`Message from user with blacklisted role ignored.`);
             }
 
-            // Check for blacklisted words
+            // * Check for blacklisted words
             const blacklistedWord = blacklist?.blacklistedWords.find(word =>
                 message.content.toLowerCase().includes(word.toLowerCase())
             );
@@ -45,9 +46,13 @@ module.exports = {
                         .setTitle('Blacklisted Word Detected')
                         .setDescription(`This user has violated the blacklist rules:`)
                         .addFields(
+                            { name: 'Message', value: message.content, inline: false },
                             { name: 'User', value: `<@${message.author.id}> (${message.author.id})`, inline: true },
-                            { name: 'Channel', value: `<#${message.channel.id}>`, inline: true },
-                            { name: 'Word', value: blacklistedWord, inline: true }
+                            {
+                                name: 'Channel',
+                                value: `[Jump to Message](https://discord.com/channels/${message.guild.id}/${message.channel.id}/${message.id})`,
+                                inline: true
+                            },                            { name: 'Word', value: blacklistedWord, inline: true }
                         )
                         .setFooter({ text: 'Please take appropriate action' })
                         .setTimestamp();
@@ -57,9 +62,16 @@ module.exports = {
                 return;
             }
 
-            // Detect language and check for blacklisted languages
+            // * Convert blacklisted languages from names to codes using languageMap
+            const normalizedBlacklistedLanguages = blacklist?.blacklistedLanguages.map(lang => {
+                const code = languageMap[lang.toLowerCase()];
+                if (!code) log(`Warning: Unknown language in blacklist - "${lang}"`);
+                return code || lang;
+            });
+            
+            // * Detect language and check for blacklisted languages
             const detectedLanguage = (await detectLanguage(message.content, serverId))?.data?.detections[0][0]?.language;
-            if (blacklist?.blacklistedLanguages.includes(detectedLanguage)) {
+            if (normalizedBlacklistedLanguages?.includes(detectedLanguage)) {
                 log(`Blacklisted language detected: ${detectedLanguage}`);
                 const logChannel = message.guild.channels.cache.get(loggingChannelId);
                 if (logChannel) {
@@ -68,18 +80,23 @@ module.exports = {
                         .setTitle('Blacklisted Language Detected')
                         .setDescription(`Detected language: ${detectedLanguage}. This user has violated the blacklist rules:`)
                         .addFields(
-                            { name: 'User', value: `<@${message.author.id}>\n(${message.author.id})`, inline: true },
-                            { name: 'Channel', value: `<#${message.channel.id}>`, inline: true },
+                            { name: 'Message', value: message.content, inline: false },
+                            { name: 'User', value: `<@${message.author.id}> (${message.author.id})`, inline: true },
+                            {
+                                name: 'Channel',
+                                value: `[Jump to Message](https://discord.com/channels/${message.guild.id}/${message.channel.id}/${message.id})`,
+                                inline: true
+                            },
                             { name: 'Language', value: detectedLanguage, inline: true }
                         )
                         .setTimestamp();
                     logChannel.send({ embeds: [embed] });
                 }
-                await message.delete();
-                return; // Stop further processing of the message
+                // await message.delete();
+                return;
             }
 
-            // Handle commands
+            // ! Handle commands
             if (message.content.startsWith(commandPrefix)) {
                 const args = message.content.slice(commandPrefix.length).trim().split(/\s+/);
                 const commandName = args.shift().toLowerCase();
@@ -93,7 +110,7 @@ module.exports = {
                 return log(`Executed command: ${commandName}`);
             }
 
-            // Handle translation logic for normal messages
+            // * Handle translation logic for normal messages
             const ignoreWordsDocs = await IgnoreWord.find({}).exec();
             const ignoreWords = ignoreWordsDocs.map((doc) => doc.word);
 

@@ -1,4 +1,4 @@
-module.exports = {
+const languageMap = {
     english: 'en',
     spanish: 'es',
     french: 'fr',
@@ -39,5 +39,6 @@ module.exports = {
     tamil: 'ta',
     telugu: 'te',
     urdu: 'ur',
-    // Add more language mappings as needed
 };
+
+module.exports = { languageMap };
