@@ -4,7 +4,9 @@ const blacklistSchema = new mongoose.Schema({
     serverId: { type: String, ref: "serverId", required: true, foreignKey: "serverId" },
     // // //
     blacklistedChannels: { type: [String], required: false, default: [] },
-    blacklistedItems: { type: [String], required: false, default: [] }
+    blacklistedLanguages: { type: [String], required: false, default: [] },
+    blacklistedRoles: { type: [String], required: false, default: [] },
+    blacklistedWords: { type: [String], required: false, default: [] }
     // // //
 });
 

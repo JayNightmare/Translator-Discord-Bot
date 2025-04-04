@@ -1,48 +1,63 @@
 const { SlashCommandBuilder, MessageFlags } = require("discord.js");
 const Blacklist = require("../models/Blacklist");
+const languageMap = require('../utils/languageMap');
 
 module.exports = {
     name: 'blacklist',
     data: new SlashCommandBuilder()
         .setName('blacklist')
-        .setDescription('Blacklist one or more channels from translation')
-        .addChannelOption(option =>
-            option.setName('channels')
-                .setDescription('The channels to blacklist')
+        .setDescription('Manage blacklists for the server')
+        .addStringOption(option =>
+            option.setName('type')
+                .setDescription('The type of blacklist to modify')
+                .setRequired(true)
+                .addChoices(
+                    { name: 'Words', value: 'words' },
+                    { name: 'Channels', value: 'channels' },
+                    { name: 'Roles', value: 'roles' },
+                    { name: 'Languages', value: 'languages' }
+                )
+        )
+        .addStringOption(option =>
+            option.setName('items')
+                .setDescription('Comma-separated list of items to blacklist')
                 .setRequired(true)
         ),
     async execute(interaction) {
-        const channels = interaction.options.getChannel('channels', true);
+        const type = interaction.options.getString('type');
+        const items = interaction.options.getString('items').split(',').map(item => item.trim());
         const serverId = interaction.guild.id;
 
-        // Ensure all provided channels are text channels
-        const invalidChannels = channels.filter(ch => ch.type !== 0);
-        if (invalidChannels.length > 0) {
-            return interaction.reply({
-                content: 'Please select only text channels.',
-                flags: MessageFlags.Ephemeral
-            });
-        }
-
         try {
-            // Get or create blacklist entry for this server
             let blacklist = await Blacklist.findOne({ serverId });
             if (!blacklist) {
                 blacklist = new Blacklist({ serverId });
             }
 
-            // Add new channels to blacklist, avoiding duplicates
-            const channelIds = channels.map(ch => ch.id);
-            const uniqueChannels = [...new Set([
-                ...(blacklist.blacklistedChannels || []),
-                ...channelIds
-            ])];
+            // Convert language names to codes using languageMap
+            const normalizedLanguages = items.map(item => languageMap[item.toLowerCase()] || item);
 
-            blacklist.blacklistedChannels = uniqueChannels;
+            switch (type) {
+                case 'words':
+                    blacklist.blacklistedWords = [...new Set([...(blacklist.blacklistedWords || []), ...items])];
+                    break;
+                case 'channels':
+                    blacklist.blacklistedChannels = [...new Set([...(blacklist.blacklistedChannels || []), ...items])];
+                    break;
+                case 'roles':
+                    blacklist.blacklistedRoles = [...new Set([...(blacklist.blacklistedRoles || []), ...items])];
+                    break;
+                case 'languages':
+                    blacklist.blacklistedLanguages = [...new Set([...(blacklist.blacklistedLanguages || []), ...normalizedLanguages])];
+                    break;
+                default:
+                    return interaction.reply({ content: 'Invalid blacklist type.', flags: MessageFlags.Ephemeral });
+            }
+
             await blacklist.save();
 
             interaction.reply({
-                content: `Successfully blacklisted ${channels.length} channel(s) from translation.`,
+                content: `Successfully updated the ${type} blacklist.`,
                 flags: MessageFlags.Ephemeral
             });
         } catch (error) {
@@ -53,4 +68,4 @@ module.exports = {
             });
         }
     }
-}
+};

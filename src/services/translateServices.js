@@ -13,6 +13,7 @@ const {
 const { RAPIDAPI_CONFIG } = require('../config/config.js');
 const Settings = require('../models/Settings'); // Import Settings model
 const languageMap = require('../utils/languageMap'); // Import a mapping of full names to shorthand codes
+const Blacklist = require('../models/Blacklist'); // Import Blacklist model
 
 // Translation cache with expiration
 const translationCache = new Map();
@@ -41,7 +42,7 @@ function cleanupCache() {
     }
 }
 
-async function detectLanguage(text) {
+async function detectLanguage(text, serverId) {
     try {
         const options = {
             method: 'POST',
@@ -53,8 +54,17 @@ async function detectLanguage(text) {
             },
             data: { q: text }
         };
-        
+
         const response = await axios.request(options);
+        const detectedLanguage = response.data?.data?.detections[0][0]?.language;
+
+        // Check for blacklisted languages
+        const blacklist = await Blacklist.findOne({ serverId });
+        if (blacklist?.blacklistedLanguages.includes(detectedLanguage)) {
+            log(`Blacklisted language detected during detection: ${detectedLanguage}`);
+            throw new Error(`Blacklisted language detected: ${detectedLanguage}`);
+        }
+
         return response.data;
     } catch (error) {
         log(`Language detection error: ${error.stack || error.message}`);
@@ -89,11 +99,11 @@ async function translateText(text, serverId) {
 
         // Detect the source language if not specified in the database
         const sourceLanguage = sourceLanguageFromDb === 'auto'
-            ? (await detectLanguage(text)).data.detections[0][0].language
+            ? (await detectLanguage(text, serverId)).data.detections[0][0].language
             : sourceLanguageFromDb;
 
         const confidence = sourceLanguageFromDb === 'auto'
-            ? (await detectLanguage(text)).data.detections[0][0].confidence
+            ? (await detectLanguage(text, serverId)).data.detections[0][0].confidence
             : 1.0;
 
         log(`Detected language: ${sourceLanguage} with confidence: ${confidence}`);
@@ -158,4 +168,4 @@ async function translateText(text, serverId) {
     }
 }
 
-module.exports = { translateText };
+module.exports = { translateText, detectLanguage };
