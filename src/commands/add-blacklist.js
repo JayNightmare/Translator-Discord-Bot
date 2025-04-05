@@ -3,9 +3,9 @@ const Blacklist = require("../models/Blacklist");
 const languageMap = require('../utils/languageMap');
 
 module.exports = {
-    name: 'blacklist',
+    name: 'blacklist-add',
     data: new SlashCommandBuilder()
-        .setName('blacklist')
+        .setName('blacklist-add')
         .setDescription('Manage blacklists for the server')
         .addStringOption(option =>
             option.setName('type')
@@ -24,6 +24,13 @@ module.exports = {
                 .setRequired(true)
         ),
     async execute(interaction) {
+        // ! Check if the user has the required permissions
+        if (!interaction.member.permissions.has('ManageGuild')) {
+            return interaction.reply({
+                content: 'You do not have permission to use this command.',
+                flags: MessageFlags.Ephemeral
+            });
+        }
         const type = interaction.options.getString('type');
         const items = interaction.options.getString('items').split(',').map(item => item.trim());
         const serverId = interaction.guild.id;
