@@ -9,7 +9,7 @@ const serverSchema = new mongoose.Schema({
     languageTo: { type: String, required: false, default: 'en' },
     languageFrom: { type: String, required: false, default: 'auto' },
     // //
-    messageType: { type: String, required: false, default: 'embed' },
+    messageType: { type: String, required: false, default: 'embed-expanded' },
 });
 
 const Settings = mongoose.model("Settings", serverSchema);

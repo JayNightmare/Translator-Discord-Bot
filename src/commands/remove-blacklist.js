@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, MessageFlags } = require("discord.js");
+const { SlashCommandBuilder, MessageFlags, PermissionFlagsBits } = require("discord.js");
 const Blacklist = require("../models/Blacklist");
 const languageMap = require('../utils/languageMap');
 
@@ -22,7 +22,8 @@ module.exports = {
             option.setName('items')
                 .setDescription('Comma-separated list of items to remove from the blacklist')
                 .setRequired(true)
-        ),
+        )
+        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
     async execute(interaction) {
         const type = interaction.options.getString('type');
         const items = interaction.options.getString('items').split(',').map(item => item.trim());

@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, MessageFlags } = require("discord.js");
+const { SlashCommandBuilder, MessageFlags, PermissionFlagsBits } = require("discord.js");
 const Blacklist = require("../models/Blacklist");
 const languageMap = require('../utils/languageMap');
 
@@ -22,15 +22,9 @@ module.exports = {
             option.setName('items')
                 .setDescription('Comma-separated list of items to blacklist')
                 .setRequired(true)
-        ),
+        )
+        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
     async execute(interaction) {
-        // ! Check if the user has the required permissions
-        if (!interaction.member.permissions.has('ManageGuild')) {
-            return interaction.reply({
-                content: 'You do not have permission to use this command.',
-                flags: MessageFlags.Ephemeral
-            });
-        }
         const type = interaction.options.getString('type');
         const items = interaction.options.getString('items').split(',').map(item => item.trim());
         const serverId = interaction.guild.id;
@@ -46,16 +40,28 @@ module.exports = {
 
             switch (type) {
                 case 'words':
-                    blacklist.blacklistedWords = [...new Set([...(blacklist.blacklistedWords || []), ...items])];
+                    blacklist.blacklistedWords = [
+                        ...(blacklist.blacklistedWords || []),
+                        ...items.filter(item => !(blacklist.blacklistedWords || []).includes(item))
+                    ];
                     break;
                 case 'channels':
-                    blacklist.blacklistedChannels = [...new Set([...(blacklist.blacklistedChannels || []), ...items])];
+                    blacklist.blacklistedChannels = [
+                        ...(blacklist.blacklistedChannels || []),
+                        ...items.filter(item => !(blacklist.blacklistedChannels || []).includes(item))
+                    ];
                     break;
                 case 'roles':
-                    blacklist.blacklistedRoles = [...new Set([...(blacklist.blacklistedRoles || []), ...items])];
+                    blacklist.blacklistedRoles = [
+                        ...(blacklist.blacklistedRoles || []),
+                        ...items.filter(item => !(blacklist.blacklistedRoles || []).includes(item))
+                    ];
                     break;
                 case 'languages':
-                    blacklist.blacklistedLanguages = [...new Set([...(blacklist.blacklistedLanguages || []), ...normalizedLanguages])];
+                    blacklist.blacklistedLanguages = [
+                        ...(blacklist.blacklistedLanguages || []),
+                        ...normalizedLanguages.filter(item => !(blacklist.blacklistedLanguages || []).includes(item))
+                    ];
                     break;
                 default:
                     return interaction.reply({ content: 'Invalid blacklist type.', flags: MessageFlags.Ephemeral });

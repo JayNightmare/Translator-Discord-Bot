@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, MessageFlags, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
+const { SlashCommandBuilder, MessageFlags, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits } = require("discord.js");
 const Blacklist = require("../models/Blacklist");
 const languageMap = require('../utils/languageMap');
 
@@ -17,8 +17,10 @@ module.exports = {
                     { name: 'Roles', value: 'roles' },
                     { name: 'Languages', value: 'languages' }
                 )
-        ),
-    async execute(interaction) {
+        )
+        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+
+        async execute(interaction) {
         const type = interaction.options.getString('type');
         const serverId = interaction.guild.id;
 
@@ -41,9 +43,9 @@ module.exports = {
 
             const formattedItems = items.map((item, index) => {
                 if (type === 'channels') {
-                    return `${start + index + 1}. <#${item}>`;
+                    return `${start + index + 1}. ${item.startsWith('<#') && item.endsWith('>') ? item : `<#${item}>`}`;
                 } else if (type === 'roles') {
-                    return `${start + index + 1}. <@&${item}>`;
+                    return `${start + index + 1}. ${item.startsWith('<@&') && item.endsWith('>') ? item : `<@&${item}>`}`;
                 } else {
                     return `${start + index + 1}. ${item}`;
                 }

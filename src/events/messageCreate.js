@@ -17,19 +17,25 @@ module.exports = {
         try {
             const serverId = message.guild.id;
             const blacklist = await Blacklist.findOne({ serverId });
+            if (!blacklist) { await Blacklist.create({ serverId }); }
 
             // * Fetch logging channel ID from Settings schema
             const settings = await Settings.findOne({ serverId });
+            if (!settings) { await Settings.create({ serverId }); }
             const loggingChannelId = settings?.loggingChannelId;
 
+            // Format the blacklisted channels so <, #, and > are removed
+            const blacklistedChannels = blacklist?.blacklistedChannels.map(channel => channel.replace(/<|#|>/g, '')) || [];
+            const blacklistedRoles = blacklist?.blacklistedRoles.map(role => role.replace(/<|@|&|>/g, '')) || [];
+
             // * Check for blacklisted channels
-            if (blacklist?.blacklistedChannels.includes(message.channel.id)) {
+            if (blacklistedChannels?.includes(message.channel.id)) {
                 return log(`Message in blacklisted channel (${message.channel.id}) ignored.`);
             }
 
             // * Check for blacklisted roles
             const memberRoles = message.member?.roles.cache.map(role => role.id) || [];
-            if (blacklist?.blacklistedRoles.some(roleId => memberRoles.includes(roleId))) {
+            if (blacklistedRoles.some(roleId => memberRoles.includes(roleId))) {
                 return log(`Message from user with blacklisted role ignored.`);
             }
 
@@ -52,7 +58,8 @@ module.exports = {
                                 name: 'Channel',
                                 value: `[Jump to Message](https://discord.com/channels/${message.guild.id}/${message.channel.id}/${message.id})`,
                                 inline: true
-                            },                            { name: 'Word', value: blacklistedWord, inline: true }
+                            },
+                            { name: 'Word', value: blacklistedWord, inline: true }
                         )
                         .setFooter({ text: 'Please take appropriate action' })
                         .setTimestamp();
@@ -92,7 +99,7 @@ module.exports = {
                         .setTimestamp();
                     logChannel.send({ embeds: [embed] });
                 }
-                // await message.delete();
+                await message.delete();
                 return;
             }
 
