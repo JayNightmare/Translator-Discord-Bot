@@ -1,6 +1,5 @@
 const { SlashCommandBuilder, MessageFlags, PermissionFlagsBits } = require("discord.js");
 const Blacklist = require("../models/Blacklist");
-const languageMap = require('../utils/languageMap');
 
 module.exports = {
     name: 'blacklist-remove',
@@ -32,40 +31,54 @@ module.exports = {
         try {
             let blacklist = await Blacklist.findOne({ serverId });
             if (!blacklist) {
-                return interaction.reply({ content: 'No blacklist found for this server.', flags: MessageFlags.Ephemeral });
+            return interaction.reply({ content: 'No blacklist found for this server.', flags: MessageFlags.Ephemeral });
             }
 
-            // Convert language names to codes using languageMap
-            const normalizedLanguages = items.map(item => languageMap[item.toLowerCase()] || item);
-
+            let notFoundItems = [];
             switch (type) {
-                case 'words':
-                    blacklist.blacklistedWords = (blacklist.blacklistedWords || []).filter(word => !items.includes(word));
-                    break;
-                case 'channels':
-                    blacklist.blacklistedChannels = (blacklist.blacklistedChannels || []).filter(channel => !items.includes(channel));
-                    break;
-                case 'roles':
-                    blacklist.blacklistedRoles = (blacklist.blacklistedRoles || []).filter(role => !items.includes(role));
-                    break;
-                case 'languages':
-                    blacklist.blacklistedLanguages = (blacklist.blacklistedLanguages || []).filter(language => !normalizedLanguages.includes(language));
-                    break;
-                default:
-                    return interaction.reply({ content: 'Invalid blacklist type.', flags: MessageFlags.Ephemeral });
+            case 'words':
+                notFoundItems = items.filter(item => !(blacklist.blacklistedWords || []).includes(item));
+                if (notFoundItems.length > 0) {
+                return interaction.reply({ content: `The following items do not exist in the blacklist: ${notFoundItems.join(', ')}`, flags: MessageFlags.Ephemeral });
+                }
+                blacklist.blacklistedWords = (blacklist.blacklistedWords || []).filter(word => !items.includes(word));
+                break;
+            case 'channels':
+                notFoundItems = items.filter(item => !(blacklist.blacklistedChannels || []).includes(item));
+                if (notFoundItems.length > 0) {
+                return interaction.reply({ content: `The following items do not exist in the blacklist: ${notFoundItems.join(', ')}`, flags: MessageFlags.Ephemeral });
+                }
+                blacklist.blacklistedChannels = (blacklist.blacklistedChannels || []).filter(channel => !items.includes(channel));
+                break;
+            case 'roles':
+                notFoundItems = items.filter(item => !(blacklist.blacklistedRoles || []).includes(item));
+                if (notFoundItems.length > 0) {
+                return interaction.reply({ content: `The following items do not exist in the blacklist: ${notFoundItems.join(', ')}`, flags: MessageFlags.Ephemeral });
+                }
+                blacklist.blacklistedRoles = (blacklist.blacklistedRoles || []).filter(role => !items.includes(role));
+                break;
+            case 'languages':
+                notFoundItems = items.filter(item => !(blacklist.blacklistedLanguages || []).includes(item));
+                if (notFoundItems.length > 0) {
+                return interaction.reply({ content: `The following items do not exist in the blacklist: ${notFoundItems.join(', ')}`, flags: MessageFlags.Ephemeral });
+                }
+                blacklist.blacklistedLanguages = (blacklist.blacklistedLanguages || []).filter(language => !items.includes(language));
+                break;
+            default:
+                return interaction.reply({ content: 'Invalid blacklist type.', flags: MessageFlags.Ephemeral });
             }
 
             await blacklist.save();
 
             interaction.reply({
-                content: `Successfully removed the specified items from the ${type} blacklist.`,
-                flags: MessageFlags.Ephemeral
+            content: `Successfully removed the ${items} from the ${type} blacklist.`,
+            flags: MessageFlags.Ephemeral
             });
         } catch (error) {
             console.error('Error updating blacklist:', error);
             interaction.reply({
-                content: 'An error occurred while updating the blacklist.',
-                flags: MessageFlags.Ephemeral
+            content: 'An error occurred while updating the blacklist.',
+            flags: MessageFlags.Ephemeral
             });
         }
     }
