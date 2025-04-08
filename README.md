@@ -41,7 +41,7 @@
   <p align="center">
     The Home of Discord Translations
     <br />
-    <a href="https://github.com/JayNightmare/TALE-FYP"><strong>Explore the docs »</strong></a>
+    <a href="https://github.com/JayNightmare/TALE-FYP"><strong>Explore the Website »</strong></a>
     <br />
     <br />
     <a href="https://jaynightmare.github.io/TALE-FYP/">View Page</a>
