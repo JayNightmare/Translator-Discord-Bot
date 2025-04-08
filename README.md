@@ -41,14 +41,14 @@
   <p align="center">
     The Home of Discord Translations
     <br />
-    <a href="https://github.com/JayNightmare/TALE-FYP"><strong>Explore the Website »</strong></a>
+    <a href="https://github.com/JayNightmare/Translator-Discord-Bot"><strong>Explore the Website »</strong></a>
     <br />
     <br />
     <a href="https://jaynightmare.github.io/TALE-FYP/">View Page</a>
     &middot;
-    <a href="https://github.com/JayNightmare/TALE-FYP/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
+    <a href="https://github.com/JayNightmare/Translator-Discord-Bot/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
     &middot;
-    <a href="https://github.com/JayNightmare/TALE-FYP/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
+    <a href="https://github.com/JayNightmare/Translator-Discord-Bot/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
   </p>
 </div>
 
@@ -103,7 +103,7 @@ This is a discord bot that in short, translates messages on Discord. The bot gra
 
 This page is to function as a info portal for users and a place for users to configure the discord bot. The page will have a few different sections, including a homepage page, a dashboard page, and a settings page.
 
-_For more examples, please refer to the [Documentation](https://jaynightmare.github.io/TALE-FYP/)_
+_For more examples, please refer to the [Documentation](https://jaynightmare.github.io/Translator-Discord-Bot/)_
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -117,7 +117,7 @@ _For more examples, please refer to the [Documentation](https://jaynightmare.git
 - [ ] Create Dashboard
     - [ ] Connect Discord API
 
-See the [open issues](https://github.com/JayNightmare/TALE-FYP/issues) for a full list of proposed features (and known issues).
+See the [open issues](https://github.com/JayNightmare/Translator-Discord-Bot/issues) for a full list of proposed features (and known issues).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -141,8 +141,8 @@ Don't forget to give the project a star! Thanks again!
 
 ### Top contributors:
 
-<a href="https://github.com/JayNightmare/TALE-FYP/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=JayNightmare/TALE-FYP" alt="contrib.rocks image" />
+<a href="https://github.com/JayNightmare/Translator-Discord-Bot/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=JayNightmare/Translator-Discord-Bot" alt="contrib.rocks image" />
 </a>
 
 
@@ -150,7 +150,7 @@ Don't forget to give the project a star! Thanks again!
 <!-- LICENSE -->
 ## License
 
-Distributed under the CC0 1.0. See [`LICENSE.txt`](https://github.com/JayNightmare/TALE-FYP/blob/master/LICENSE.txt) for more information.
+Distributed under the CC0 1.0. See [`LICENSE.txt`](https://github.com/JayNightmare/Translator-Discord-Bot/blob/master/LICENSE.txt) for more information.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -159,7 +159,7 @@ Distributed under the CC0 1.0. See [`LICENSE.txt`](https://github.com/JayNightma
 <!-- CONTACT -->
 ## Contact
 
-- Project Link: [https://github.com/JayNightmare/TALE-FYP](https://github.com/JayNightmare/TALE-FYP)
+- Project Link: [https://github.com/JayNightmare/Translator-Discord-Bot](https://github.com/JayNightmare/Translator-Discord-Bot)
 - Discord: jaynightmare
 - Email: jn3.enquiries@gmail.com 
 
@@ -168,20 +168,20 @@ Distributed under the CC0 1.0. See [`LICENSE.txt`](https://github.com/JayNightma
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/JayNightmare/TALE-FYP.svg?style=for-the-badge
-[contributors-url]: https://github.com/JayNightmare/TALE-FYP/graphs/contributors
+[contributors-shield]: https://img.shields.io/github/contributors/JayNightmare/Translator-Discord-Bot.svg?style=for-the-badge
+[contributors-url]: https://github.com/JayNightmare/Translator-Discord-Bot/graphs/contributors
 <!-- // -->
-[forks-shield]: https://img.shields.io/github/forks/JayNightmare/TALE-FYP.svg?style=for-the-badge
-[forks-url]: https://github.com/JayNightmare/TALE-FYP/network/members
+[forks-shield]: https://img.shields.io/github/forks/JayNightmare/Translator-Discord-Bot.svg?style=for-the-badge
+[forks-url]: https://github.com/JayNightmare/Translator-Discord-Bot/network/members
 <!-- // -->
-[stars-shield]: https://img.shields.io/github/stars/JayNightmare/TALE-FYP.svg?style=for-the-badge
-[stars-url]: https://github.com/JayNightmare/TALE-FYP/stargazers
+[stars-shield]: https://img.shields.io/github/stars/JayNightmare/Translator-Discord-Bot.svg?style=for-the-badge
+[stars-url]: https://github.com/JayNightmare/Translator-Discord-Bot/stargazers
 <!-- // -->
-[issues-shield]: https://img.shields.io/github/issues/JayNightmare/TALE-FYP.svg?style=for-the-badge
-[issues-url]: https://github.com/JayNightmare/TALE-FYP/issues
+[issues-shield]: https://img.shields.io/github/issues/JayNightmare/Translator-Discord-Bot.svg?style=for-the-badge
+[issues-url]: https://github.com/JayNightmare/Translator-Discord-Bot/issues
 <!-- // -->
-[license-shield]: https://img.shields.io/github/license/JayNightmare/TALE-FYP.svg?style=for-the-badge
-[license-url]: https://github.com/JayNightmare/TALE-FYP/blob/master/LICENSE.txt
+[license-shield]: https://img.shields.io/github/license/JayNightmare/Translator-Discord-Bot.svg?style=for-the-badge
+[license-url]: https://github.com/JayNightmare/Translator-Discord-Bot/blob/master/LICENSE.txt
 <!-- // -->
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://www.linkedin.com/in/jordan-s-bell/
@@ -231,4 +231,4 @@ Distributed under the CC0 1.0. See [`LICENSE.txt`](https://github.com/JayNightma
 [Discord-Bot-url]: https://github.com/JayNightmare/Translator-Discord-Bot
 <!-- // -->
 [TALE-website]: https://img.shields.io/badge/-T.A.L.E-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[TALE-url]: https://github.com/JayNightmare/TALE-FYP
+[TALE-url]: https://github.com/JayNightmare/Translator-Discord-Bot
