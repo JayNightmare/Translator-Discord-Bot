@@ -161,7 +161,7 @@ Distributed under the CC0 1.0. See [`LICENSE.txt`](https://github.com/JayNightma
 
 - Project Link: [https://github.com/JayNightmare/TALE-FYP](https://github.com/JayNightmare/TALE-FYP)
 - Discord: jaynightmare
-- Email: jn3.enquiries@gmail.com
+- Email: jn3.enquiries@gmail.com 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
