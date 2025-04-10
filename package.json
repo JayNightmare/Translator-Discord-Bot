@@ -35,7 +35,10 @@
     "ws": "^8.18.1"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest",
+    "test:unit": "jest tests/unit",
+    "test:integration": "jest tests/integration",
+    "test:security": "jest tests/security"
   },
   "repository": {
     "type": "git",
@@ -52,5 +55,21 @@
   "bugs": {
     "url": "https://github.com/JayNightmare/Translator-Discord-Bot/issues"
   },
-  "homepage": "https://github.com/JayNightmare/Translator-Discord-Bot#readme"
+  "homepage": "https://github.com/JayNightmare/Translator-Discord-Bot#readme",
+  "devDependencies": {
+    "jest": "^29.5.0",
+    "mongodb-memory-server": "^8.13.0",
+    "nock": "^13.3.1",
+    "supertest": "^6.3.3"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "setupFilesAfterEnv": ["<rootDir>/tests/jest.setup.js"],
+    "collectCoverage": true,
+    "coverageDirectory": "coverage",
+    "coverageReporters": ["text", "lcov"],
+    "testMatch": [
+      "**/tests/**/*.test.js"
+    ]
+  }
 }
