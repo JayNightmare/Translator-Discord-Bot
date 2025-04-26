@@ -45,7 +45,7 @@ try {
     }
     connectToDatabase();
 } catch (error) {
-    log(`(error #%d) Error occured during start up ${error}`);
+    console.error(`(error #%d) Error occured during start up ${error}`);
     log(`// ############################## //`);
     console.error(`(error #%d) Error occured during start up ${error}`)
 }

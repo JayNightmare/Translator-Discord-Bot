@@ -1,17 +1,18 @@
-const { SlashCommandBuilder, MessageFlags } = require("discord.js");
+const { PermissionFlagsBits, SlashCommandBuilder, MessageFlags } = require("discord.js");
 const Server = require("../models/Server");
 const Settings = require("../models/Settings");
 
 module.exports= {
     name: 'log-channel',
     data: new SlashCommandBuilder()
-    .setName('log-channel')
-    .setDescription('Set the log channel for the server')
-    .addChannelOption(option =>
-        option.setName('channel')
-        .setDescription('The channel to set as the log channel')
-        .setRequired(true)
-    ),
+        .setName('log-channel')
+        .setDescription('Set the log channel for the server')
+        .addChannelOption(option =>
+            option.setName('channel')
+            .setDescription('The channel to set as the log channel')
+            .setRequired(true)
+        )
+        .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
     async execute(interaction) {
         const channel = interaction.options.getChannel('channel');
 

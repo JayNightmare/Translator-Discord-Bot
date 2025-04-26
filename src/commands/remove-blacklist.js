@@ -22,7 +22,7 @@ module.exports = {
                 .setDescription('Comma-separated list of items to remove from the blacklist')
                 .setRequired(true)
         )
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+        .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
     async execute(interaction) {
         const type = interaction.options.getString('type');
         const items = interaction.options.getString('items').split(',').map(item => item.trim());

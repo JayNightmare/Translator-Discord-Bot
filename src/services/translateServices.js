@@ -72,14 +72,26 @@ async function detectLanguage(text, serverId) {
     }
 }
 
-async function translateText(text, serverId) {
+async function translateText(text, serverId, commandTargetLanguage, commandSourceLanguage) {
     try {
         log(`Attempting to translate text: ${text}`);
-        
+
         // Fetch language settings from the database
         const settings = await Settings.findOne({ serverId });
-        let targetLanguage = settings?.languageTo || 'en';
-        let sourceLanguageFromDb = settings?.languageFrom || 'auto';
+        if (!settings) {
+            log(`No settings found for server ${serverId}`);
+            // Create default settings if none exist
+            await Settings.create({ serverId, languageTo: 'en', languageFrom: 'auto', autoTranslate: true });
+        }
+
+        // Check if auto-translation is disabled
+        if (!settings?.autoTranslate) {
+            log(`Auto-translation is disabled for server ${serverId}. Skipping translation.`);
+            return { translatedText: null, flagUrl: null, languageName: null };
+        }
+
+        let targetLanguage = commandTargetLanguage || settings?.languageTo || 'en';
+        let sourceLanguageFromDb = commandSourceLanguage || settings?.languageFrom || 'auto';
 
         log(`Settings for server ${serverId}: targetLanguage=${targetLanguage}, sourceLanguageFromDb=${sourceLanguageFromDb}`);
 
@@ -115,7 +127,7 @@ async function translateText(text, serverId) {
         }
 
         let translatedText = null;
-        
+
         // 1️⃣ Try Google Translate (via RapidAPI)
         try {
             log('Attempting to translate with Google Translate');

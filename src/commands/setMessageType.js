@@ -1,10 +1,10 @@
-const { SlashCommandBuilder, MessageFlags } = require("discord.js");
+const { PermissionFlagsBits, SlashCommandBuilder, MessageFlags } = require("discord.js");
 const Settings = require("../models/Settings");
 
 module.exports = {
-    name: 'setmessagetype',
+    name: 'set-message-type',
     data: new SlashCommandBuilder()
-        .setName('setmessagetype')
+        .setName('set-message-type')
         .setDescription('Set how the translated message is sent')
         .addStringOption(option =>
             option.setName('type')
@@ -16,7 +16,8 @@ module.exports = {
                     { name: 'Text Expanded', value: 'text_expanded' },
                     { name: 'Text Minimal', value: 'text_minimal' }
                 )
-        ),
+        )
+        .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
     async execute(interaction) {
         const messageType = interaction.options.getString('type');
         const serverId = interaction.guild.id;

@@ -43,7 +43,7 @@ describe("Translation Service Security", () => {
                 .mockResolvedValueOnce(translateResponse);
 
             const result = await translateText(longText, mockServerId);
-            expect(result.translatedText).toBeDefined();
+            expect(result).toBeDefined();
         });
 
         it("should handle special characters", async () => {

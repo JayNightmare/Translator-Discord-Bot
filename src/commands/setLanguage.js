@@ -1,10 +1,10 @@
-const { SlashCommandBuilder, MessageFlags } = require("discord.js");
+const { PermissionFlagsBits, SlashCommandBuilder, MessageFlags } = require("discord.js");
 const Settings = require("../models/Settings");
 
 module.exports = {
-    name: 'setlanguage',
+    name: 'set-language',
     data: new SlashCommandBuilder()
-        .setName('setlanguage')
+        .setName('set-language')
         .setDescription('Set the server\'s translation languages')
         .addStringOption(option =>
             option.setName('language_to')
@@ -15,7 +15,8 @@ module.exports = {
             option.setName('language_from')
                 .setDescription('The language to translate from (default: auto detect)')
                 .setRequired(false)
-        ),
+        )
+        .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
     async execute(interaction) {
         const languageTo = interaction.options.getString('language_to');
         const languageFrom = interaction.options.getString('language_from') || 'auto';

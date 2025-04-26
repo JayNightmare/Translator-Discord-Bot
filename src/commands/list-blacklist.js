@@ -18,9 +18,8 @@ module.exports = {
                     { name: 'Languages', value: 'languages' }
                 )
         )
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-
-        async execute(interaction) {
+        .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
+    async execute(interaction) {
         const type = interaction.options.getString('type');
         const serverId = interaction.guild.id;
 
