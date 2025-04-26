@@ -5,7 +5,7 @@ function cleanMessage(content) {
         .replace(/<:[a-zA-Z0-9_]+:[0-9]+>/g, '') // Remove custom emotes
         .replace(/:[a-zA-Z0-9_]+:/g, '')         // Remove text-based emotes
         .replace(/[\u{1F600}-\u{1F64F}]/gu, '')  // Remove Unicode emojis
-        .replace(/[^a-zA-Z0-9\s]/g, '')          // Remove special characters and symbols, only allow numbers and letters
+        // .replace(/[^a-zA-Z0-9\s]/g, '')          // Allow special characters and symbols, comment out this line
         .trim();
 
     log(`Cleaned message: ${content}`);

@@ -19,7 +19,7 @@ module.exports = {
         .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
     async execute(interaction) {
         const languageTo = interaction.options.getString('language_to');
-        const languageFrom = interaction.options.getString('language_from') || 'auto';
+        let languageFrom = interaction.options.getString('language_from') || 'auto';
         const serverId = interaction.guild.id;
 
         try {
@@ -27,6 +27,11 @@ module.exports = {
             let settings = await Settings.findOne({ serverId });
             if (!settings) {
                 settings = new Settings({ serverId });
+            }
+
+            // If languageFrom contains the word "auto", set it to 'auto'
+            if (languageFrom.toLowerCase().includes('auto')) {
+                languageFrom = 'auto';
             }
 
             // Update language settings

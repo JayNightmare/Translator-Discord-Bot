@@ -1,6 +1,6 @@
 const { SlashCommandBuilder, MessageFlags, PermissionFlagsBits } = require("discord.js");
 const Blacklist = require("../models/Blacklist");
-const languageMap = require('../utils/languageMap');
+const languageMap = require('../utils/language/languageMap.json');
 
 module.exports = {
     name: 'blacklist-add',
@@ -35,8 +35,12 @@ module.exports = {
                 blacklist = new Blacklist({ serverId });
             }
 
+            const nameToCode = Object.fromEntries(
+                Object.entries(languageMap).map(([code, name]) => [name, code])
+            );
+
             // Convert language names to codes using languageMap
-            const normalizedLanguages = items.map(item => languageMap[item.toLowerCase()] || item);
+            const normalizedLanguages = items.map(item => nameToCode[item.toLowerCase()] || item);
 
             switch (type) {
                 case 'words':

@@ -1,3 +1,5 @@
+const languageMap = require('./language/languageMap.json');
+
 function getFlagUrl(languageCode) {
     const flagMap = {
         af: "https://flagcdn.com/w40/za.png", // Afrikaans (South Africa)
@@ -52,55 +54,6 @@ function getFlagUrl(languageCode) {
 }
 
 function getLanguageName(languageCode) {
-    const languageMap = {
-        af: "Afrikaans",
-        ar: "Arabic",
-        az: "Azerbaijani",
-        be: "Belarusian",
-        bg: "Bulgarian",
-        bn: "Bengali",
-        cs: "Czech",
-        da: "Danish",
-        de: "German",
-        el: "Greek",
-        es: "Spanish",
-        et: "Estonian",
-        fa: "Persian",
-        fi: "Finnish",
-        fr: "French",
-        he: "Hebrew",
-        hi: "Hindi",
-        hr: "Croatian",
-        hu: "Hungarian",
-        id: "Indonesian",
-        it: "Italian",
-        ja: "Japanese",
-        ka: "Georgian",
-        kk: "Kazakh",
-        ko: "Korean",
-        lt: "Lithuanian",
-        lv: "Latvian",
-        mk: "Macedonian",
-        mn: "Mongolian",
-        ms: "Malay",
-        nb: "Norwegian",
-        nl: "Dutch",
-        pl: "Polish",
-        pt: "Portuguese",
-        ro: "Romanian",
-        ru: "Russian",
-        sk: "Slovak",
-        sl: "Slovenian",
-        sq: "Albanian",
-        sr: "Serbian",
-        sv: "Swedish",
-        th: "Thai",
-        tr: "Turkish",
-        uk: "Ukrainian",
-        vi: "Vietnamese",
-        zh: "Chinese",
-    };
-
     return languageMap[languageCode] || "Unknown Language";
 }
 

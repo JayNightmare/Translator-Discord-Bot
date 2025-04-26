@@ -11,9 +11,9 @@ const {
 } = require('../utils/utils-translationProviders.js');
 
 const { RAPIDAPI_CONFIG } = require('../config/config.js');
-const Settings = require('../models/Settings'); // Import Settings model
-const languageMap = require('../utils/languageMap'); // Import a mapping of full names to shorthand codes
-const Blacklist = require('../models/Blacklist'); // Import Blacklist model
+const Settings = require('../models/Settings');
+const languageMap = require('../utils/language/languageMap.json');
+const Blacklist = require('../models/Blacklist');
 
 // Translation cache with expiration
 const translationCache = new Map();
@@ -56,15 +56,6 @@ async function detectLanguage(text, serverId) {
         };
 
         const response = await axios.request(options);
-        const detectedLanguage = response.data?.data?.detections[0][0]?.language;
-
-        // Check for blacklisted languages
-        const blacklist = await Blacklist.findOne({ serverId });
-        if (blacklist?.blacklistedLanguages.includes(detectedLanguage)) {
-            log(`Blacklisted language detected during detection: ${detectedLanguage}`);
-            throw new Error(`Blacklisted language detected: ${detectedLanguage}`);
-        }
-
         return response.data;
     } catch (error) {
         log(`Language detection error: ${error.stack || error.message}`);
@@ -72,9 +63,17 @@ async function detectLanguage(text, serverId) {
     }
 }
 
+const nameToCode = Object.fromEntries(
+    Object.entries(languageMap).map(([code, name]) => [name, code])
+);
+
 async function translateText(text, serverId, commandTargetLanguage, commandSourceLanguage) {
     try {
         log(`Attempting to translate text: ${text}`);
+
+        // Check if commandTargetLanguage and commandSourceLanguage are provided
+        if (!commandTargetLanguage) commandSourceLanguage = null;
+        if (!commandSourceLanguage) commandTargetLanguage = null;
 
         // Fetch language settings from the database
         const settings = await Settings.findOne({ serverId });
@@ -91,39 +90,51 @@ async function translateText(text, serverId, commandTargetLanguage, commandSourc
         }
 
         let targetLanguage = commandTargetLanguage || settings?.languageTo || 'en';
-        let sourceLanguageFromDb = commandSourceLanguage || settings?.languageFrom || 'auto';
-
-        log(`Settings for server ${serverId}: targetLanguage=${targetLanguage}, sourceLanguageFromDb=${sourceLanguageFromDb}`);
+        let sourceLanguage = commandSourceLanguage || settings?.languageFrom || 'auto';
+        if (sourceLanguage === 'auto') {
+            // Detect the source language if not provided using detectLanguage function
+            const detection = await detectLanguage(text);
+            sourceLanguage = detection.data.detections[0][0].language;
+        }
 
         // Convert full language names to shorthand codes
-        targetLanguage = languageMap[targetLanguage.toLowerCase()] || targetLanguage;
-        sourceLanguageFromDb = languageMap[sourceLanguageFromDb.toLowerCase()] || sourceLanguageFromDb;
+        targetLanguage = nameToCode[targetLanguage.toLowerCase()] || targetLanguage;
+        sourceLanguage = nameToCode[sourceLanguage.toLowerCase()] || sourceLanguage;
 
         // Check cache first
         const cacheKey = getCacheKey(text, targetLanguage);
         if (translationCache.has(cacheKey)) {
             const cached = translationCache.get(cacheKey);
             if (Date.now() - cached.timestamp < CACHE_EXPIRATION) {
-                log(`Using cached translation for: ${text}`);
                 return cached.result;
             }
         }
 
-        // Detect the source language if not specified in the database
-        const sourceLanguage = sourceLanguageFromDb === 'auto'
-            ? (await detectLanguage(text, serverId)).data.detections[0][0].language
-            : sourceLanguageFromDb;
-
-        const confidence = sourceLanguageFromDb === 'auto'
-            ? (await detectLanguage(text, serverId)).data.detections[0][0].confidence
-            : 1.0;
-
-        log(`Detected language: ${sourceLanguage} with confidence: ${confidence}`);
-
-        // Skip translation if confidence is below 75% or source and target languages are the same
-        if (confidence < 0.75 || sourceLanguage === targetLanguage) {
-            log(`Translation skipped due to low confidence or identical source and target languages.`);
+        // If source language is specified and matches target, skip translation
+        if (sourceLanguage !== 'auto' && sourceLanguage === targetLanguage) {
+            log(`Translation skipped - source language matches target language`);
             return { translatedText: null, flagUrl: null, languageName: null };
+        }
+
+        let detectedSourceLanguage;
+        let confidence;
+
+        // Only detect language if source is auto
+        if (sourceLanguage === 'auto') {
+            const detection = await detectLanguage(text, serverId);
+            detectedSourceLanguage = detection.data.detections[0][0].language;
+            confidence = detection.data.detections[0][0].confidence;
+
+            log(`Detected language: ${detectedSourceLanguage} with confidence: ${confidence}`);
+
+            // Skip translation if confidence is low
+            if (confidence < 0.75) {
+                log(`Translation skipped due to low confidence`);
+                return { translatedText: null, flagUrl: null, languageName: null };
+            }
+        } else {
+            detectedSourceLanguage = sourceLanguage;
+            confidence = 1.0;
         }
 
         let translatedText = null;
@@ -131,7 +142,7 @@ async function translateText(text, serverId, commandTargetLanguage, commandSourc
         // 1️⃣ Try Google Translate (via RapidAPI)
         try {
             log('Attempting to translate with Google Translate');
-            translatedText = await translateWithRapidAPI(text, sourceLanguage, targetLanguage, 'google');
+            translatedText = await translateWithRapidAPI(text, detectedSourceLanguage, targetLanguage, 'google');
         } catch (error) {
             log(`Google Translate failed: ${error.message}`);
         }
@@ -140,7 +151,7 @@ async function translateText(text, serverId, commandTargetLanguage, commandSourc
         if (!translatedText) {
             try {
                 log('Attempting to translate with DeepL');
-                translatedText = await translateWithRapidAPI(text, sourceLanguage, targetLanguage, 'deepl');
+                translatedText = await translateWithRapidAPI(text, detectedSourceLanguage, targetLanguage, 'deepl');
             } catch (error) {
                 log(`DeepL Translate failed: ${error.message}`);
             }
@@ -161,8 +172,8 @@ async function translateText(text, serverId, commandTargetLanguage, commandSourc
             throw new Error('All translation services failed');
         }
 
-        const flagUrl = getFlagUrl(sourceLanguage);
-        const languageName = getLanguageName(sourceLanguage);
+        const flagUrl = getFlagUrl(detectedSourceLanguage);
+        const languageName = getLanguageName(detectedSourceLanguage);
 
         const result = { translatedText, flagUrl, languageName };
 

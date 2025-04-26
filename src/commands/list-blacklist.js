@@ -1,6 +1,5 @@
 const { SlashCommandBuilder, MessageFlags, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits } = require("discord.js");
 const Blacklist = require("../models/Blacklist");
-const languageMap = require('../utils/languageMap');
 
 module.exports = {
     name: 'blacklist-list',
