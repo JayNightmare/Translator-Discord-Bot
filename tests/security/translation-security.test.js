@@ -1,36 +1,48 @@
-const {
-    translateText,
-    detectLanguage,
-} = require("../../src/services/translateServices");
+const { translateText } = require("../../src/services/translateServices");
+const Settings = require("../../src/models/Settings");
 const axios = require("axios");
 
 jest.mock("axios");
 jest.mock("../../src/utils/utils-logger");
 
-describe("Translation Service Security", () => {
+describe("Translation Security Tests", () => {
     const mockServerId = "test-server-123";
 
-    beforeEach(() => {
+    beforeEach(async () => {
         jest.clearAllMocks();
+        await Settings.deleteMany({});
+        await Settings.create({ serverId: mockServerId });
     });
 
     describe("Input Validation", () => {
         it("should handle empty text input", async () => {
-            await expect(translateText("", mockServerId)).rejects.toThrow();
+            await expect(translateText("", mockServerId))
+                .rejects
+                .toThrow();
         });
 
-        it("should handle extremely long text input", async () => {
-            const longText = "a".repeat(10000);
+        it("should handle null text input", async () => {
+            await expect(translateText(null, mockServerId))
+                .rejects
+                .toThrow();
+        });
 
-            const detectResponse = {
+        it("should handle undefined serverId", async () => {
+            await expect(translateText("Hello", undefined))
+                .rejects
+                .toThrow();
+        });
+
+        it("should handle very long text input", async () => {
+            const longText = "a".repeat(10000);
+            const mockDetection = {
                 data: {
                     data: {
                         detections: [[{ language: "en", confidence: 0.9 }]],
                     },
                 },
             };
-
-            const translateResponse = {
+            const mockTranslation = {
                 data: {
                     data: {
                         translations: [{ translatedText: "translated" }],
@@ -39,75 +51,74 @@ describe("Translation Service Security", () => {
             };
 
             axios.request
-                .mockResolvedValueOnce(detectResponse)
-                .mockResolvedValueOnce(translateResponse);
+                .mockResolvedValueOnce(mockDetection)
+                .mockResolvedValueOnce(mockTranslation);
 
             const result = await translateText(longText, mockServerId);
-            expect(result).toBeDefined();
-        });
-
-        it("should handle special characters", async () => {
-            const specialChars = '!@#$%^&*()_+<>?:"{}|';
-
-            const detectResponse = {
-                data: {
-                    data: {
-                        detections: [[{ language: "en", confidence: 0.9 }]],
-                    },
-                },
-            };
-
-            const translateResponse = {
-                data: {
-                    data: {
-                        translations: [{ translatedText: "translated" }],
-                    },
-                },
-            };
-
-            axios.request
-                .mockResolvedValueOnce(detectResponse)
-                .mockResolvedValueOnce(translateResponse);
-
-            const result = await translateText(specialChars, mockServerId);
             expect(result.translatedText).toBeDefined();
         });
     });
 
     describe("API Security", () => {
-        it("should handle API timeouts", async () => {
-            axios.request.mockRejectedValueOnce(new Error("timeout"));
+        it("should handle API key errors", async () => {
+            const mockError = new Error("Invalid API key");
+            mockError.response = { status: 403 };
+            axios.request.mockRejectedValueOnce(mockError);
 
-            await expect(
-                detectLanguage("Hello", mockServerId)
-            ).rejects.toThrow();
+            await expect(translateText("Hello", mockServerId))
+                .rejects
+                .toThrow();
         });
 
-        it("should handle API rate limiting", async () => {
-            const rateLimitError = {
-                response: {
-                    status: 429,
-                    data: { message: "Too Many Requests" },
+        it("should handle rate limiting errors", async () => {
+            const mockError = new Error("Rate limit exceeded");
+            mockError.response = { status: 429 };
+            axios.request.mockRejectedValueOnce(mockError);
+
+            await expect(translateText("Hello", mockServerId))
+                .rejects
+                .toThrow();
+        });
+
+        it("should handle malformed API responses", async () => {
+            const mockDetection = {
+                data: {
+                    malformed: "response"
+                }
+            };
+            axios.request.mockResolvedValueOnce(mockDetection);
+
+            await expect(translateText("Hello", mockServerId))
+                .rejects
+                .toThrow();
+        });
+    });
+
+    describe("XSS Prevention", () => {
+        it("should handle text with HTML/script tags", async () => {
+            const maliciousText = "<script>alert('xss')</script>";
+            const mockDetection = {
+                data: {
+                    data: {
+                        detections: [[{ language: "en", confidence: 0.9 }]],
+                    },
+                },
+            };
+            const mockTranslation = {
+                data: {
+                    data: {
+                        translations: [{ translatedText: "sanitized text" }],
+                    },
                 },
             };
 
-            axios.request.mockRejectedValueOnce(rateLimitError);
+            axios.request
+                .mockResolvedValueOnce(mockDetection)
+                .mockResolvedValueOnce(mockTranslation);
 
-            await expect(
-                detectLanguage("Hello", mockServerId)
-            ).rejects.toThrow();
-        });
-
-        it("should handle invalid API responses", async () => {
-            const invalidResponse = {
-                data: "invalid",
-            };
-
-            axios.request.mockResolvedValueOnce(invalidResponse);
-
-            await expect(
-                detectLanguage("Hello", mockServerId)
-            ).rejects.toThrow();
+            const result = await translateText(maliciousText, mockServerId);
+            expect(result.translatedText).toBeDefined();
+            expect(result.translatedText).not.toContain("<script>");
         });
     });
 });

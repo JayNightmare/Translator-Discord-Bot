@@ -91,11 +91,6 @@ async function translateText(text, serverId, commandTargetLanguage, commandSourc
 
         let targetLanguage = commandTargetLanguage || settings?.languageTo || 'en';
         let sourceLanguage = commandSourceLanguage || settings?.languageFrom || 'auto';
-        if (sourceLanguage === 'auto') {
-            // Detect the source language if not provided using detectLanguage function
-            const detection = await detectLanguage(text);
-            sourceLanguage = detection.data.detections[0][0].language;
-        }
 
         // Convert full language names to shorthand codes
         targetLanguage = nameToCode[targetLanguage.toLowerCase()] || targetLanguage;
@@ -113,7 +108,7 @@ async function translateText(text, serverId, commandTargetLanguage, commandSourc
         // If source language is specified and matches target, skip translation
         if (sourceLanguage !== 'auto' && sourceLanguage === targetLanguage) {
             log(`Translation skipped - source language matches target language`);
-            return { translatedText: null, flagUrl: null, languageName: null };
+            return { translatedText: null , flagUrl: null, languageName: null };
         }
 
         let detectedSourceLanguage;
@@ -135,6 +130,13 @@ async function translateText(text, serverId, commandTargetLanguage, commandSourc
         } else {
             detectedSourceLanguage = sourceLanguage;
             confidence = 1.0;
+        }
+
+        // Check if the detected language is blacklisted
+        const blacklist = await Blacklist.findOne({ serverId });
+        if (blacklist && blacklist.blacklistedLanguages.includes(detectedSourceLanguage)) {
+            log(`Blocked translation from blacklisted language: ${detectedSourceLanguage}`);
+            throw new Error(`Blacklisted language detected: ${detectedSourceLanguage}`);
         }
 
         let translatedText = null;
