@@ -42,7 +42,7 @@ function cleanupCache() {
     }
 }
 
-async function detectLanguage(text, serverId) {
+async function detectLanguage(text) {
     try {
         const options = {
             method: 'POST',
@@ -63,9 +63,12 @@ async function detectLanguage(text, serverId) {
     }
 }
 
-const nameToCode = Object.fromEntries(
-    Object.entries(languageMap).map(([code, name]) => [name, code])
-);
+const nameToCode = Object.entries(languageMap).reduce((acc, [code, names]) => {
+    names.split(';').forEach(name => {
+        acc[name.trim().toLowerCase()] = code;
+    });
+    return acc;
+}, {});
 
 async function translateText(text, serverId, commandTargetLanguage, commandSourceLanguage) {
     try {
@@ -92,9 +95,23 @@ async function translateText(text, serverId, commandTargetLanguage, commandSourc
         let targetLanguage = commandTargetLanguage || settings?.languageTo || 'en';
         let sourceLanguage = commandSourceLanguage || settings?.languageFrom || 'auto';
 
+        if (sourceLanguage === 'auto') {
+            const detection = await detectLanguage(text);
+            sourceLanguage = detection.data.detections[0][0].language;
+            log(`Auto-detected source language: ${sourceLanguage}`);
+        }
+
         // Convert full language names to shorthand codes
         targetLanguage = nameToCode[targetLanguage.toLowerCase()] || targetLanguage;
         sourceLanguage = nameToCode[sourceLanguage.toLowerCase()] || sourceLanguage;
+
+        // If source language is specified and matches target, skip translation
+        if (sourceLanguage && targetLanguage && sourceLanguage !== 'auto' && sourceLanguage === targetLanguage) {
+            log(`Translation skipped - source language matches target language`);
+            return { translatedText: null, flagUrl: null, languageName: null };
+        } else {
+            log(`Source language: ${sourceLanguage}, Target language: ${targetLanguage}`);
+        }
 
         // Check cache first
         const cacheKey = getCacheKey(text, targetLanguage);
@@ -105,25 +122,19 @@ async function translateText(text, serverId, commandTargetLanguage, commandSourc
             }
         }
 
-        // If source language is specified and matches target, skip translation
-        if (sourceLanguage !== 'auto' && sourceLanguage === targetLanguage) {
-            log(`Translation skipped - source language matches target language`);
-            return { translatedText: null , flagUrl: null, languageName: null };
-        }
-
         let detectedSourceLanguage;
         let confidence;
 
         // Only detect language if source is auto
         if (sourceLanguage === 'auto') {
-            const detection = await detectLanguage(text, serverId);
+            const detection = await detectLanguage(text);
             detectedSourceLanguage = detection.data.detections[0][0].language;
             confidence = detection.data.detections[0][0].confidence;
 
             log(`Detected language: ${detectedSourceLanguage} with confidence: ${confidence}`);
 
             // Skip translation if confidence is low
-            if (confidence < 0.75) {
+            if (confidence < 0.8) {
                 log(`Translation skipped due to low confidence`);
                 return { translatedText: null, flagUrl: null, languageName: null };
             }

@@ -1,8 +1,13 @@
 const axios = require('axios');
 const { RAPIDAPI_CONFIG } = require('../config/config.js');
+const { log } = require('../utils/utils-logger.js');
 
 async function translateWithRapidAPI(text, sourceLanguage, targetLanguage, provider) {
     let options;
+    
+    // Check source and target languages
+    log(`Source Language: ${sourceLanguage}`);
+    log(`Target Language: ${targetLanguage}`);
 
     if (provider === 'google') {
         options = {
